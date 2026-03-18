@@ -1,4 +1,5 @@
 from flask import Flask, request
+import os
 
 app = Flask(__name__)
 
@@ -8,5 +9,6 @@ def chat():
     return f"Echo: {user_input}"
 
 if __name__ == "__main__":
-    print("Server listening on port 8080")
-    app.run(host="0.0.0.0", port=8080)
+    # Railway provides PORT as an environment variable
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
