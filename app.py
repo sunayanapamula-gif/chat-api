@@ -5,13 +5,17 @@ app = Flask(__name__)
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_input = request.data.decode("utf-8").strip()
+    # Try to parse JSON first
+    data = request.get_json(silent=True)
+    if data and "message" in data:
+        user_input = data["message"].strip()
+    else:
+        # Fallback: check form data or raw text
+        user_input = request.form.get("message") or request.data.decode("utf-8").strip()
 
-    # If no input, return a default reply
     if not user_input:
         reply = "I didn’t receive any message. Please try again!"
     elif "code" in user_input.lower():
-        # Generate a simple Python code snippet
         reply = """Here’s a sample Python code:
 
 def greet(name):
@@ -19,7 +23,6 @@ def greet(name):
 
 print(greet("LinkedIn"))"""
     else:
-        # Normal reply
         reply = f"You said: {user_input}. Here’s my reply: Hello from your API!"
 
     return jsonify({"reply": reply})
