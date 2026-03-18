@@ -1,0 +1,10 @@
+[build]
+builder = "nixpacks"
+
+[nixpacks]
+packages = ["python3", "python3-pip"]
+
+[phases.install]
+cmds = [
+  "pip install -r requirements.txt"
+]
