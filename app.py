@@ -45,4 +45,5 @@ def ui():
     return send_from_directory(".", "index.html")
 
 if __name__ == "__main__":
+    # Local dev only — Railway uses Gunicorn
     app.run(host="0.0.0.0", port=8080)
