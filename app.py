@@ -1,34 +1,22 @@
+import requests
 from flask import Flask, request, jsonify
-import os, requests
 
 app = Flask(__name__)
 
-@app.route("/")
-def home():
-    return "Hello, Flask is running!"
-
 @app.route("/chat", methods=["POST"])
 def chat():
-    data = request.get_json(silent=True)
-    user_input = data.get("message", "").strip()
-
-    if not user_input:
-        return jsonify({"reply": "I didn’t receive any message. Please try again!"})
-
-    if os.environ.get("RAILWAY_ENVIRONMENT"):
-        # Mock reply for Railway
-        return jsonify({"reply": f"(Mocked reply) You asked: '{user_input}'"})
-    else:
-        # Real Ollama integration for local testing
-        try:
-            response = requests.post(
-                "http://localhost:11434/api/generate",
-                json={"model": "codellama:7b", "prompt": user_input}
-            )
-            reply = response.json().get("response", "No reply generated.")
-            return jsonify({"reply": reply})
-        except Exception as e:
-            return jsonify({"error": str(e)})
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    user_input = request.json.get("message", "")
+    response = requests.post(
+        "http://localhost:11434/api/generate",
+        json={"model": "mistral", "prompt": user_input}
+    )
+    # Ollama streams JSON lines, so join them into one string
+    output = ""
+    for line in response.iter_lines():
+        if line:
+            data = line.decode("utf-8")
+            if "\"response\"" in data:
+                # extract text between quotes after "response":
+                part = data.split("\"response\":\"")[1].split("\"")[0]
+                output += part
+    return jsonify({"reply": output})
