@@ -28,6 +28,7 @@
       });
       const data = await response.json();
       document.getElementById("chat-box").innerHTML += `<div class="bot">Bot: ${data.reply}</div>`;
+      document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
     }
   </script>
 </body>
