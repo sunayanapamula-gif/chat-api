@@ -1,13 +1,15 @@
 import os
 import requests
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 
 app = Flask(__name__)
 
+# Root route for health check
 @app.route("/")
 def home():
     return "Chat API is running!"
 
+# Chat route
 @app.route("/chat", methods=["POST"])
 def chat():
     user_input = request.json.get("message", "")
@@ -36,3 +38,11 @@ def chat():
             return jsonify({"reply": output})
         except Exception as e:
             return jsonify({"error": str(e)})
+
+# Simple UI route
+@app.route("/ui")
+def ui():
+    return send_from_directory(".", "index.html")
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
