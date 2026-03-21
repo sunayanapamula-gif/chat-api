@@ -1,48 +1,34 @@
-import os
-import requests
-from flask import Flask, request, jsonify, send_from_directory
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat API Demo</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #chat-box { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; }
+    .user { color: blue; margin: 5px 0; }
+    .bot { color: green; margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <h2>Chat Demo</h2>
+  <div id="chat-box"></div>
+  <input id="message" type="text" placeholder="Type your message..." style="width:80%">
+  <button onclick="sendMessage()">Send</button>
 
-app = Flask(__name__)
+  <script>
+    async function sendMessage() {
+      const msg = document.getElementById("message").value;
+      document.getElementById("chat-box").innerHTML += `<div class="user">You: ${msg}</div>`;
+      document.getElementById("message").value = "";
 
-# Root route for health check
-@app.route("/")
-def home():
-    return "Chat API is running!"
-
-# Chat route
-@app.route("/chat", methods=["POST"])
-def chat():
-    user_input = request.json.get("message", "")
-
-    # Detect Railway environment
-    if os.environ.get("RAILWAY_ENVIRONMENT"):
-        # Mocked reply for Railway (no Ollama available there)
-        return jsonify({"reply": f"Mocked reply for: {user_input}"})
-    else:
-        # Local Ollama call
-        try:
-            response = requests.post(
-                "http://localhost:11434/api/generate",
-                json={"model": "mistral", "prompt": user_input},
-                stream=True
-            )
-
-            output = ""
-            for line in response.iter_lines():
-                if line:
-                    data = line.decode("utf-8")
-                    if "\"response\"" in data:
-                        part = data.split("\"response\":\"")[1].split("\"")[0]
-                        output += part
-
-            return jsonify({"reply": output})
-        except Exception as e:
-            return jsonify({"error": str(e)})
-
-# Simple UI route
-@app.route("/ui")
-def ui():
-    return send_from_directory(".", "index.html")
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+      const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg })
+      });
+      const data = await response.json();
+      document.getElementById("chat-box").innerHTML += `<div class="bot">Bot: ${data.reply}</div>`;
+    }
+  </script>
+</body>
+</html>
