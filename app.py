@@ -31,7 +31,7 @@ def chat():
         except Exception as e:
             return jsonify({"error": str(e)})
 
-# Serve the frontend UI
+# Serve the frontend UI from templates folder
 @app.route("/ui")
 def ui():
     return render_template("index.html")
