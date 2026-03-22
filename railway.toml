@@ -1,6 +1,8 @@
-[service]
-name = "chat-api"
+[build]
+builder = "heroku/buildpacks:20"
 
-[env]
-WEB_CONCURRENCY = "1"
-TIMEOUT = "300"
+[deploy]
+startCommand = "gunicorn app:app --workers 1 --timeout 300 --bind 0.0.0.0:$PORT"
+
+[service]
+internal_port = 8080
