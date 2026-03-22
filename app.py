@@ -1,5 +1,6 @@
 import os
 import requests
+import json
 from flask import Flask, request, jsonify, render_template_string
 
 app = Flask(__name__)
@@ -96,10 +97,11 @@ def chat():
         for line in response.iter_lines():
             if line:
                 try:
-                    obj = eval(line.decode("utf-8"))
+                    obj = json.loads(line.decode("utf-8"))
                     if "response" in obj:
                         reply += obj["response"]
                 except Exception:
+                    # fallback: append raw text
                     reply += line.decode("utf-8")
 
         return jsonify({"reply": reply.strip()})
