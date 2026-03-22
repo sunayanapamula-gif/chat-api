@@ -54,6 +54,14 @@
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
         }
+
+        // Add Enter key shortcut
+        document.getElementById("message").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault(); // prevent form submission
+                sendMessage();
+            }
+        });
     </script>
 </body>
 </html>
