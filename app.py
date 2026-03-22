@@ -11,24 +11,64 @@ UI_TEMPLATE = """
 <html>
 <head>
     <title>Chat API Interface</title>
+    <style>
+        #chat-box {
+            border:1px solid #ccc;
+            padding:10px;
+            width:400px;
+            height:300px;
+            overflow-y:scroll;
+        }
+        .typing {
+            font-style: italic;
+            color: gray;
+        }
+    </style>
 </head>
 <body>
     <h2>Chat API Interface</h2>
-    <div id="chat-box" style="border:1px solid #ccc; padding:10px; width:400px; height:300px; overflow-y:scroll;"></div>
+    <div id="chat-box"></div>
     <input type="text" id="user-input" placeholder="Type your message..." style="width:300px;">
     <button onclick="sendMessage()">Send</button>
 
     <script>
         async function sendMessage() {
             const userMessage = document.getElementById("user-input").value;
-            document.getElementById("chat-box").innerHTML += "<p><b>You:</b> " + userMessage + "</p>";
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += "<p><b>You:</b> " + userMessage + "</p>";
+
+            // Show typing indicator
+            const typingIndicator = document.createElement("p");
+            typingIndicator.className = "typing";
+            typingIndicator.innerText = "Bot is typing...";
+            chatBox.appendChild(typingIndicator);
+
             const response = await fetch("/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: userMessage })
             });
             const data = await response.json();
-            document.getElementById("chat-box").innerHTML += "<p><b>Bot:</b> " + data.reply + "</p>";
+
+            // Remove typing indicator
+            chatBox.removeChild(typingIndicator);
+
+            // Typing animation
+            const botReply = data.reply;
+            let i = 0;
+            const botLine = document.createElement("p");
+            botLine.innerHTML = "<b>Bot:</b> ";
+            chatBox.appendChild(botLine);
+
+            function typeWriter() {
+                if (i < botReply.length) {
+                    botLine.innerHTML += botReply.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 30); // speed in ms per character
+                }
+            }
+            typeWriter();
+
             document.getElementById("user-input").value = "";
         }
     </script>
