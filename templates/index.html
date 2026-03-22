@@ -1,23 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chat API UI</title>
+    <title>Chat API Interface</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
         #chat-box {
             border: 1px solid #ccc;
             padding: 10px;
-            width: 400px;
-            height: 300px;
+            width: 500px;
+            height: 350px;
             overflow-y: auto;
-            background: #fafafa;
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
         #input-box { margin-top: 10px; }
-        #message { width: 300px; padding: 5px; }
-        button { padding: 6px 12px; }
-        .user { color: #333; }
-        .bot { color: #0066cc; }
-        .typing { font-style: italic; color: gray; }
+        #message { width: 400px; padding: 8px; }
+        button { padding: 8px 14px; }
+        .user { color: #333; margin: 4px 0; }
+        .bot { color: #0066cc; margin: 4px 0; }
+        .typing { font-style: italic; color: gray; margin: 4px 0; }
     </style>
 </head>
 <body>
@@ -55,11 +56,24 @@
                 });
                 const data = await res.json();
 
-                // Remove typing indicator
                 chatBox.removeChild(typingIndicator);
 
-                chatBox.innerHTML += `<p class="bot"><b>Bot:</b> ${data.reply}</p>`;
-                chatBox.scrollTop = chatBox.scrollHeight;
+                // Typewriter effect for bot reply
+                const botLine = document.createElement("p");
+                botLine.className = "bot";
+                botLine.innerHTML = "<b>Bot:</b> ";
+                chatBox.appendChild(botLine);
+
+                let i = 0;
+                function typeWriter() {
+                    if (i < data.reply.length) {
+                        botLine.innerHTML += data.reply.charAt(i);
+                        i++;
+                        setTimeout(typeWriter, 30);
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    }
+                }
+                typeWriter();
             } catch (err) {
                 chatBox.removeChild(typingIndicator);
                 chatBox.innerHTML += `<p class="bot"><b>Error:</b> ${err}</p>`;
@@ -67,10 +81,10 @@
             }
         }
 
-        // Add Enter key shortcut
+        // Enter key shortcut
         document.getElementById("message").addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
-                event.preventDefault(); // prevent form submission
+                event.preventDefault();
                 sendMessage();
             }
         });
