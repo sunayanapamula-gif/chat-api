@@ -9,7 +9,7 @@
     body { font-family: Arial, sans-serif; margin: 20px; }
     #chatBox { border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: auto; }
     .user { color: blue; margin: 5px 0; }
-    .bot { color: green; margin: 5px 0; }
+    .ai { color: green; margin: 5px 0; }
     pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; position: relative; }
     code { font-family: monospace; }
     .copy-btn {
@@ -26,11 +26,13 @@
     }
     #inputBox { width: 80%; padding: 8px; }
     #sendBtn { padding: 8px; }
+    #typingIndicator { font-style: italic; color: gray; margin: 5px 0; }
   </style>
 </head>
 <body>
   <h2>Chat Board</h2>
   <div id="chatBox"></div>
+  <p id="typingIndicator" style="display:none;">AI is typing…</p>
   <input id="inputBox" type="text" placeholder="Type your message...">
   <button id="sendBtn">Send</button>
 
@@ -45,12 +47,15 @@
     const chatBox = document.getElementById("chatBox");
     const inputBox = document.getElementById("inputBox");
     const sendBtn = document.getElementById("sendBtn");
+    const typingIndicator = document.getElementById("typingIndicator");
 
     async function sendMessage() {
       const msg = inputBox.value.trim();
       if (!msg) return;
       chatBox.innerHTML += `<p class="user"><b>You:</b> ${msg}</p>`;
       inputBox.value = "";
+
+      typingIndicator.style.display = "block"; // show typing indicator
 
       const res = await fetch("/chat", {
         method: "POST",
@@ -60,22 +65,22 @@
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
-      let botReply = "";
+      let aiReply = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        botReply += decoder.decode(value, { stream: true });
+        aiReply += decoder.decode(value, { stream: true });
 
         // Split by code fences
-        const parts = botReply.split("```");
+        const parts = aiReply.split("```");
         chatBox.innerHTML = ""; // reset and rebuild
 
         for (let i = 0; i < parts.length; i++) {
           if (i % 2 === 0) {
             // Normal text
             if (parts[i].trim()) {
-              chatBox.innerHTML += `<p class="bot"><b>Bot:</b> ${parts[i]}</p>`;
+              chatBox.innerHTML += `<p class="ai"><b>AI:</b> ${parts[i]}</p>`;
             }
           } else {
             // Code block with optional language tag
@@ -102,6 +107,8 @@
         chatBox.scrollTop = chatBox.scrollHeight;
         Prism.highlightAll(); // re-run highlighting after update
       }
+
+      typingIndicator.style.display = "none"; // hide typing indicator
     }
 
     function copyCode(id) {
