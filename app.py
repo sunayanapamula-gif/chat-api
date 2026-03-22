@@ -6,6 +6,11 @@ app = Flask(__name__)
 # Replace this with your current Cloudflare Tunnel URL
 OLLAMA_URL = "https://impressive-echo-limitation-cities.trycloudflare.com"
 
+@app.route("/")
+def home():
+    # Root route for Railway health checks
+    return "Chat API is running!"
+
 @app.route("/chat", methods=["POST"])
 def chat():
     user_message = request.json.get("message", "")
@@ -38,4 +43,5 @@ def chat():
 
 
 if __name__ == "__main__":
+    # Railway expects the app to listen on 0.0.0.0 and port 8080
     app.run(host="0.0.0.0", port=8080)
