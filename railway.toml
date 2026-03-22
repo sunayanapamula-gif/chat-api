@@ -1,5 +1,5 @@
-[build]
-builder = "heroku/buildpacks:20"
+[service]
+name = "chat-api"
 
 [env]
 WEB_CONCURRENCY = "1"
