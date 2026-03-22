@@ -17,6 +17,7 @@
         button { padding: 6px 12px; }
         .user { color: #333; }
         .bot { color: #0066cc; }
+        .typing { font-style: italic; color: gray; }
     </style>
 </head>
 <body>
@@ -39,6 +40,13 @@
 
             msgInput.value = "";
 
+            // Show typing indicator
+            const typingIndicator = document.createElement("p");
+            typingIndicator.className = "typing";
+            typingIndicator.innerText = "Bot is typing...";
+            chatBox.appendChild(typingIndicator);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
             try {
                 const res = await fetch("/chat", {
                     method: "POST",
@@ -47,9 +55,13 @@
                 });
                 const data = await res.json();
 
+                // Remove typing indicator
+                chatBox.removeChild(typingIndicator);
+
                 chatBox.innerHTML += `<p class="bot"><b>Bot:</b> ${data.reply}</p>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
             } catch (err) {
+                chatBox.removeChild(typingIndicator);
                 chatBox.innerHTML += `<p class="bot"><b>Error:</b> ${err}</p>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
