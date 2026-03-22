@@ -1,3 +1,7 @@
+print("OLLAMA_URL =", OLLAMA_URL)
+print("WEB_CONCURRENCY =", os.getenv("WEB_CONCURRENCY"))
+print("TIMEOUT =", os.getenv("TIMEOUT"))
+
 import os
 import requests
 import json
