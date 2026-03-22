@@ -1,15 +1,16 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import requests
+import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static")
 
 # Replace this with your current Cloudflare Tunnel URL
 OLLAMA_URL = "https://impressive-echo-limitation-cities.trycloudflare.com"
 
 @app.route("/")
 def home():
-    # Root route for Railway health checks
-    return "Chat API is running!"
+    # Serve the frontend interface
+    return send_from_directory("static", "index.html")
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -26,7 +27,6 @@ def chat():
             timeout=60
         )
 
-        # Collect streamed response
         output = ""
         for line in response.iter_lines():
             if line:
