@@ -12,10 +12,8 @@ def home():
 def chat():
     user_input = request.json.get("message", "")
     if os.environ.get("RAILWAY_ENVIRONMENT"):
-        # Mocked reply for Railway (since Ollama isn't available there)
         return jsonify({"reply": f"Mocked reply for: {user_input}"})
     else:
-        # Local Ollama call
         try:
             response = requests.post(
                 "http://localhost:11434/api/generate",
@@ -33,7 +31,7 @@ def chat():
         except Exception as e:
             return jsonify({"error": str(e)})
 
-# Serve the frontend UI from templates folder
+# Serve the frontend UI
 @app.route("/ui")
 def ui():
     return render_template("index.html")
