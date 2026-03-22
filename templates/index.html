@@ -1,35 +1,42 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Chat API Demo</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    #chat-box { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; }
-    .user { color: blue; margin: 5px 0; }
-    .bot { color: green; margin: 5px 0; }
-  </style>
-</head>
-<body>
-  <h2>Chat Demo</h2>
-  <div id="chat-box"></div>
-  <input id="message" type="text" placeholder="Type your message..." style="width:80%">
-  <button onclick="sendMessage()">Send</button>
+import os
+import requests
+from flask import Flask, request, jsonify, render_template
 
-  <script>
-    async function sendMessage() {
-      const msg = document.getElementById("message").value;
-      document.getElementById("chat-box").innerHTML += `<div class="user">You: ${msg}</div>`;
-      document.getElementById("message").value = "";
+app = Flask(__name__)
 
-      const response = await fetch("/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg })
-      });
-      const data = await response.json();
-      document.getElementById("chat-box").innerHTML += `<div class="bot">Bot: ${data.reply}</div>`;
-      document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
-    }
-  </script>
-</body>
-</html>
+@app.route("/")
+def home():
+    return "Chat API is running!"
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    user_input = request.json.get("message", "")
+    if os.environ.get("RAILWAY_ENVIRONMENT"):
+        # Mocked reply for Railway (since Ollama isn't available there)
+        return jsonify({"reply": f"Mocked reply for: {user_input}"})
+    else:
+        # Local Ollama call
+        try:
+            response = requests.post(
+                "http://localhost:11434/api/generate",
+                json={"model": "mistral", "prompt": user_input},
+                stream=True
+            )
+            output = ""
+            for line in response.iter_lines():
+                if line:
+                    data = line.decode("utf-8")
+                    if "\"response\"" in data:
+                        part = data.split("\"response\":\"")[1].split("\"")[0]
+                        output += part
+            return jsonify({"reply": output})
+        except Exception as e:
+            return jsonify({"error": str(e)})
+
+# Serve the frontend UI from templates folder
+@app.route("/ui")
+def ui():
+    return render_template("index.html")
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
