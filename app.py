@@ -12,8 +12,10 @@ def home():
 def chat():
     user_input = request.json.get("message", "")
     if os.environ.get("RAILWAY_ENVIRONMENT"):
+        # Mocked reply for Railway (since Ollama isn't available there)
         return jsonify({"reply": f"Mocked reply for: {user_input}"})
     else:
+        # Local Ollama call
         try:
             response = requests.post(
                 "http://localhost:11434/api/generate",
