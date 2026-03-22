@@ -66,6 +66,7 @@ UI_TEMPLATE = """
                     botLine.innerHTML += botReply.charAt(i);
                     i++;
                     setTimeout(typeWriter, 30); // speed in ms per character
+                    chatBox.scrollTop = chatBox.scrollHeight; // auto-scroll
                 }
             }
             typeWriter();
@@ -77,8 +78,9 @@ UI_TEMPLATE = """
 </html>
 """
 
-@app.route("/ui")
-def ui():
+# Serve UI directly at root URL
+@app.route("/")
+def index():
     return render_template_string(UI_TEMPLATE)
 
 @app.route("/chat", methods=["POST"])
@@ -101,8 +103,7 @@ def chat():
                     if "response" in obj:
                         reply += obj["response"]
                 except Exception:
-                    # fallback: append raw text
-                    reply += line.decode("utf-8")
+                    pass  # ignore malformed lines
 
         return jsonify({"reply": reply.strip()})
     except Exception as e:
