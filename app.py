@@ -13,20 +13,21 @@ print(">>> OLLAMA_URL =", OLLAMA_URL)
 print(">>> WEB_CONCURRENCY =", os.getenv("WEB_CONCURRENCY"))
 print(">>> TIMEOUT =", os.getenv("TIMEOUT"))
 
+# Simple HTML UI
 UI_TEMPLATE = """
 <!DOCTYPE html>
 <html>
 <head>
     <title>Chat API Interface</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        #chat-box { border:1px solid #ccc; padding:10px; width:400px; height:300px; overflow-y:auto; background:#fafafa; }
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        #chat-box { border:1px solid #ccc; padding:10px; width:500px; height:350px; overflow-y:auto; background:#fff; }
         #input-box { margin-top:10px; }
-        #message { width:300px; padding:5px; }
-        button { padding:6px 12px; }
-        .user { color:#333; }
-        .bot { color:#0066cc; }
-        .typing { font-style:italic; color:gray; }
+        #message { width:400px; padding:8px; }
+        button { padding:8px 14px; }
+        .user { color:#333; margin:4px 0; }
+        .bot { color:#0066cc; margin:4px 0; }
+        .typing { font-style:italic; color:gray; margin:4px 0; }
     </style>
 </head>
 <body>
@@ -49,7 +50,6 @@ UI_TEMPLATE = """
 
             msgInput.value = "";
 
-            // Show typing indicator
             const typingIndicator = document.createElement("p");
             typingIndicator.className = "typing";
             typingIndicator.innerText = "Bot is typing...";
@@ -93,7 +93,6 @@ def index():
 def chat():
     user_input = request.json.get("message", "")
     try:
-        # Non-streaming request for simplicity (avoids Gunicorn timeout issues)
         response = requests.post(
             f"{OLLAMA_URL}/api/generate",
             json={"model": "mistral", "prompt": user_input},
@@ -111,3 +110,12 @@ def chat():
         return jsonify({"reply": reply.strip() or "(no response)"})
     except Exception as e:
         return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
+
+# Health-check route
+@app.route("/ping")
+def ping():
+    try:
+        r = requests.get(f"{OLLAMA_URL}/api/tags", timeout=10)
+        return jsonify({"status": "ok", "ollama_status": r.status_code})
+    except Exception as e:
+        return jsonify({"status": "error", "detail": str(e)})
