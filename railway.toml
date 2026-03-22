@@ -1,5 +1,6 @@
 [build]
-builder = "NIXPACKS"
+builder = "heroku/buildpacks:20"
 
-[deploy]
-startCommand = "gunicorn app:app --bind 0.0.0.0:$PORT"
+[env]
+WEB_CONCURRENCY = "1"
+TIMEOUT = "300"
