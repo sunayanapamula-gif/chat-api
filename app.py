@@ -9,7 +9,7 @@ OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
 @app.route("/chat", methods=["POST"])
 def chat():
     user_input = request.json.get("message", "")
-    
+
     # Call Ollama through ngrok
     response = requests.post(
         f"{OLLAMA_URL}/api/generate",
@@ -17,11 +17,9 @@ def chat():
         stream=True
     )
 
-    # Collect Ollama’s reply
     reply = ""
     for line in response.iter_lines():
         if line:
-            data = line.decode("utf-8")
-            reply += data
+            reply += line.decode("utf-8")
 
     return jsonify({"reply": reply})
