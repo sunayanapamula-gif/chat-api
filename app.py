@@ -1,16 +1,15 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, render_template
 import requests
-import os
 
-app = Flask(__name__, static_folder="static")
+app = Flask(__name__)
 
 # Replace this with your current Cloudflare Tunnel URL
 OLLAMA_URL = "https://impressive-echo-limitation-cities.trycloudflare.com"
 
 @app.route("/")
 def home():
-    # Serve the frontend interface
-    return send_from_directory("static", "index.html")
+    # Render the frontend interface from templates/index.html
+    return render_template("index.html")
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -43,5 +42,5 @@ def chat():
 
 
 if __name__ == "__main__":
-    # Railway expects the app to listen on 0.0.0.0 and port 8080
+    # Local dev run (Railway will use Gunicorn via Procfile)
     app.run(host="0.0.0.0", port=8080)
