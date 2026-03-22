@@ -26,7 +26,7 @@ def chat():
         response = requests.post(
             f"{OLLAMA_URL}/api/generate",
             json={"model": "mistral", "prompt": user_input},
-            timeout=60
+            timeout=120
         )
 
         reply = ""
