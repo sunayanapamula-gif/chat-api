@@ -5,11 +5,13 @@ from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
-# Read environment variable safely
+# Read environment variables safely
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434").strip()
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral").strip()
 
 # Sanity check: print values to logs
 print(">>> OLLAMA_URL =", OLLAMA_URL)
+print(">>> OLLAMA_MODEL =", OLLAMA_MODEL)
 print(">>> WEB_CONCURRENCY =", os.getenv("WEB_CONCURRENCY"))
 print(">>> TIMEOUT =", os.getenv("TIMEOUT"))
 
@@ -26,10 +28,10 @@ def chat():
         return jsonify({"reply": "(no input)"})
 
     try:
-        # Call Ollama through Cloudflare Tunnel or local
+        # Call Ollama through ngrok/Cloudflare Tunnel or local
         response = requests.post(
             f"{OLLAMA_URL}/api/generate",
-            json={"model": "mistral", "prompt": user_input},
+            json={"model": OLLAMA_MODEL, "prompt": user_input},
             stream=True,
             timeout=120
         )
@@ -44,7 +46,9 @@ def chat():
             except Exception:
                 continue
 
-        return jsonify({"reply": reply.strip() or "(no response)"})
+        if not reply.strip():
+            return jsonify({"reply": "(no response from Ollama)"})
+        return jsonify({"reply": reply.strip()})
 
     except Exception as e:
         return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
