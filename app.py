@@ -31,11 +31,10 @@ def chat():
         except Exception as e:
             return jsonify({"error": str(e)})
 
-# Serve the frontend UI from templates folder
+# Serve the frontend UI
 @app.route("/ui")
 def ui():
     return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
-    
