@@ -1,42 +1,34 @@
-import os
-import requests
-from flask import Flask, request, jsonify, render_template
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat API UI</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        #chat-box { border: 1px solid #ccc; padding: 10px; width: 400px; height: 300px; overflow-y: auto; }
+        #input-box { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Chat API Interface</h1>
+    <div id="chat-box"></div>
+    <div id="input-box">
+        <input type="text" id="message" placeholder="Type your message..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
 
-app = Flask(__name__)
-
-@app.route("/")
-def home():
-    return "Chat API is running!"
-
-@app.route("/chat", methods=["POST"])
-def chat():
-    user_input = request.json.get("message", "")
-    if os.environ.get("RAILWAY_ENVIRONMENT"):
-        # Mocked reply for Railway (since Ollama isn't available there)
-        return jsonify({"reply": f"Mocked reply for: {user_input}"})
-    else:
-        # Local Ollama call
-        try:
-            response = requests.post(
-                "http://localhost:11434/api/generate",
-                json={"model": "mistral", "prompt": user_input},
-                stream=True
-            )
-            output = ""
-            for line in response.iter_lines():
-                if line:
-                    data = line.decode("utf-8")
-                    if "\"response\"" in data:
-                        part = data.split("\"response\":\"")[1].split("\"")[0]
-                        output += part
-            return jsonify({"reply": output})
-        except Exception as e:
-            return jsonify({"error": str(e)})
-
-# Serve the frontend UI from templates folder
-@app.route("/ui")
-def ui():
-    return render_template("index.html")
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    <script>
+        async function sendMessage() {
+            const msg = document.getElementById("message").value;
+            const res = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: msg })
+            });
+            const data = await res.json();
+            document.getElementById("chat-box").innerHTML += "<p><b>You:</b> " + msg + "</p>";
+            document.getElementById("chat-box").innerHTML += "<p><b>Bot:</b> " + data.reply + "</p>";
+            document.getElementById("message").value = "";
+        }
+    </script>
+</body>
+</html>
