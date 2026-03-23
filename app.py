@@ -1,15 +1,16 @@
 import os
 import requests
+import json
 from flask import Flask, request, jsonify, render_template
-from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # allow browser clients
 
-# Hugging Face setup
-HF_TOKEN = os.getenv("HF_TOKEN")
-HF_MODEL = os.getenv("HF_MODEL", "mistralai/Mistral-7B-Instruct-v0.3")
-HF_API_URL = f"https://api-inference.huggingface.co/models/{HF_MODEL}"
+# Ollama setup
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434").strip()
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral").strip()
+
+print(">>> OLLAMA_URL =", OLLAMA_URL)
+print(">>> OLLAMA_MODEL =", OLLAMA_MODEL)
 
 @app.route("/")
 def index():
@@ -17,39 +18,39 @@ def index():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_input = request.json.get("message", "").strip()
+    user_input = request.json.get("message", "")
     if not user_input:
         return jsonify({"reply": "(no input)"})
 
-    headers = {"Authorization": f"Bearer {HF_TOKEN}"} if HF_TOKEN else {}
-    payload = {
-        "inputs": user_input,
-        "parameters": {"max_new_tokens": 200}
-    }
-
     try:
-        response = requests.post(HF_API_URL, headers=headers, json=payload, timeout=60)
-        response.raise_for_status()
-        result = response.json()
+        response = requests.post(
+            f"{OLLAMA_URL}/api/generate",
+            json={"model": OLLAMA_MODEL, "prompt": user_input},
+            stream=True,
+            timeout=120
+        )
+        reply = ""
+        for line in response.iter_lines():
+            if not line:
+                continue
+            try:
+                obj = json.loads(line.decode("utf-8"))
+                reply += obj.get("response", "")
+            except Exception:
+                continue
 
-        # Hugging Face returns a list with generated_text
-        if isinstance(result, list) and "generated_text" in result[0]:
-            reply = result[0]["generated_text"]
-        else:
-            reply = str(result)
+        if not reply.strip():
+            return jsonify({"reply": "(no response from Ollama)"})
 
         return jsonify({"reply": reply.strip()})
-    except requests.exceptions.RequestException as e:
-        return jsonify({"reply": f"Error contacting Hugging Face: {str(e)}"})
     except Exception as e:
-        return jsonify({"reply": f"Unexpected error: {str(e)}"})
+        return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
 
 @app.route("/ping")
 def ping():
-    headers = {"Authorization": f"Bearer {HF_TOKEN}"} if HF_TOKEN else {}
     try:
-        r = requests.get(HF_API_URL, headers=headers, timeout=10)
-        return jsonify({"status": "ok", "hf_status": r.status_code})
+        r = requests.get(f"{OLLAMA_URL}/api/tags", timeout=10)
+        return jsonify({"status": "ok", "ollama_status": r.status_code})
     except Exception as e:
         return jsonify({"status": "error", "detail": str(e)})
 
