@@ -5,20 +5,25 @@ from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
-# Ollama setup
+# Environment variables with safe defaults
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434").strip()
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral").strip()
 
+# Log startup values
 print(">>> OLLAMA_URL =", OLLAMA_URL)
 print(">>> OLLAMA_MODEL =", OLLAMA_MODEL)
+print(">>> WEB_CONCURRENCY =", os.getenv("WEB_CONCURRENCY"))
+print(">>> TIMEOUT =", os.getenv("TIMEOUT"))
 
+# Serve index.html from templates/
 @app.route("/")
 def index():
     return render_template("index.html")
 
+# Chat route
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_input = request.json.get("message", "")
+    user_input = request.json.get("message", "").strip()
     if not user_input:
         return jsonify({"reply": "(no input)"})
 
@@ -29,6 +34,7 @@ def chat():
             stream=True,
             timeout=120
         )
+
         reply = ""
         for line in response.iter_lines():
             if not line:
@@ -39,13 +45,14 @@ def chat():
             except Exception:
                 continue
 
-        if not reply.strip():
-            return jsonify({"reply": "(no response from Ollama)"})
+        return jsonify({"reply": reply.strip() or "(no response from Ollama)"})
 
-        return jsonify({"reply": reply.strip()})
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
         return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
+    except Exception as e:
+        return jsonify({"reply": f"Unexpected error: {str(e)}"})
 
+# Health-check route
 @app.route("/ping")
 def ping():
     try:
@@ -55,4 +62,5 @@ def ping():
         return jsonify({"status": "error", "detail": str(e)})
 
 if __name__ == "__main__":
+    # Local dev server
     app.run(host="0.0.0.0", port=8080)
