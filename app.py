@@ -1,15 +1,12 @@
 import os
 import requests
-import json
 from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
-OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434").strip()
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral").strip()
-
-print(">>> OLLAMA_URL =", OLLAMA_URL)
-print(">>> OLLAMA_MODEL =", OLLAMA_MODEL)
+# Hugging Face setup
+HF_TOKEN = os.getenv("HF_TOKEN")  # set this in Railway variables
+HF_MODEL = "mistralai/Mistral-7B-Instruct-v0.3"
 
 @app.route("/")
 def index():
@@ -21,41 +18,41 @@ def chat():
     if not user_input:
         return jsonify({"reply": "(no input)"})
 
+    headers = {"Authorization": f"Bearer {HF_TOKEN}"}
+    payload = {
+        "inputs": user_input,
+        "parameters": {"max_new_tokens": 200}
+    }
+
     try:
         response = requests.post(
-            f"{OLLAMA_URL}/api/generate",
-            json={"model": OLLAMA_MODEL, "prompt": user_input},
-            stream=True,
-            timeout=120
+            f"https://api-inference.huggingface.co/models/{HF_MODEL}",
+            headers=headers,
+            json=payload,
+            timeout=60
         )
+        response.raise_for_status()
+        result = response.json()
 
-        reply = ""
-        for line in response.iter_lines():
-            if not line:
-                continue
-            try:
-                obj = json.loads(line.decode("utf-8"))
-                reply += obj.get("response", "")
-            except Exception:
-                continue
-
-        if not reply.strip():
-            return jsonify({"reply": "(no response from Ollama)"})
-
-        # Wrap code blocks in triple backticks if Ollama generated code
-        if "```" in reply:
-            return jsonify({"reply": reply.strip()})
+        # Hugging Face returns a list with generated_text
+        if isinstance(result, list) and "generated_text" in result[0]:
+            reply = result[0]["generated_text"]
         else:
-            return jsonify({"reply": reply.strip()})
+            reply = str(result)
 
+        return jsonify({"reply": reply.strip()})
     except Exception as e:
-        return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
+        return jsonify({"reply": f"Error contacting Hugging Face: {str(e)}"})
 
 @app.route("/ping")
 def ping():
     try:
-        r = requests.get(f"{OLLAMA_URL}/api/tags", timeout=10)
-        return jsonify({"status": "ok", "ollama_status": r.status_code})
+        r = requests.get(
+            f"https://api-inference.huggingface.co/models/{HF_MODEL}",
+            headers={"Authorization": f"Bearer {HF_TOKEN}"},
+            timeout=10
+        )
+        return jsonify({"status": "ok", "hf_status": r.status_code})
     except Exception as e:
         return jsonify({"status": "error", "detail": str(e)})
 
