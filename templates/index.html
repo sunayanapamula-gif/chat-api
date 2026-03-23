@@ -1,128 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Chat Board</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      margin: 0;
-      padding: 0;
-    }
-    #chat-container {
-      max-width: 800px;
-      margin: 40px auto;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    #messages {
-      height: 400px;
-      overflow-y: auto;
-      border: 1px solid #eee;
-      padding: 10px;
-      margin-bottom: 15px;
-      white-space: pre-wrap;
-    }
-    .message {
-      margin: 8px 0;
-    }
-    .user {
-      font-weight: bold;
-      color: #2c3e50;
-    }
-    .ai {
-      color: #16a085;
-    }
-    code {
-      background: #f4f4f4;
-      padding: 4px 6px;
-      border-radius: 4px;
-      font-family: Consolas, monospace;
-    }
-    pre {
-      background: #f4f4f4;
-      padding: 10px;
-      border-radius: 6px;
-      overflow-x: auto;
-    }
-    #input-area {
-      display: flex;
-    }
-    #message-input {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    #send-btn {
-      margin-left: 10px;
-      padding: 10px 20px;
-      border: none;
-      background: #16a085;
-      color: #fff;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    #send-btn:hover {
-      background: #138d75;
-    }
-  </style>
-</head>
-<body>
-  <div id="chat-container">
-    <h2>Chat Board</h2>
-    <div id="messages"></div>
-    <div id="input-area">
-      <input id="message-input" type="text" placeholder="Type your message..." />
-      <button id="send-btn">Send</button>
-    </div>
-  </div>
+import os
+import requests
+import json
+from flask import Flask, request, jsonify, render_template
 
-  <script>
-    const messagesDiv = document.getElementById("messages");
-    const input = document.getElementById("message-input");
-    const sendBtn = document.getElementById("send-btn");
+app = Flask(__name__)
 
-    function appendMessage(sender, text) {
-      const div = document.createElement("div");
-      div.classList.add("message", sender);
-      if (text.includes("```")) {
-        // Format code blocks
-        const parts = text.split("```");
-        div.innerHTML = `<span class="${sender}">${sender}:</span><br><pre><code>${parts[1]}</code></pre>`;
-      } else {
-        div.innerHTML = `<span class="${sender}">${sender}:</span> ${text}`;
-      }
-      messagesDiv.appendChild(div);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434").strip()
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral").strip()
 
-    sendBtn.addEventListener("click", async () => {
-      const msg = input.value.trim();
-      if (!msg) return;
-      appendMessage("user", msg);
-      input.value = "";
+print(">>> OLLAMA_URL =", OLLAMA_URL)
+print(">>> OLLAMA_MODEL =", OLLAMA_MODEL)
 
-      try {
-        const res = await fetch("/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: msg })
-        });
-        const data = await res.json();
-        appendMessage("ai", data.reply);
-      } catch (err) {
-        appendMessage("ai", "Error: " + err.message);
-      }
-    });
+@app.route("/")
+def index():
+    return render_template("index.html")
 
-    input.addEventListener("keypress", e => {
-      if (e.key === "Enter") sendBtn.click();
-    });
-  </script>
-</body>
-</html>
+@app.route("/chat", methods=["POST"])
+def chat():
+    user_input = request.json.get("message", "")
+    if not user_input:
+        return jsonify({"reply": "(no input)"})
+
+    try:
+        response = requests.post(
+            f"{OLLAMA_URL}/api/generate",
+            json={"model": OLLAMA_MODEL, "prompt": user_input},
+            stream=True,
+            timeout=120
+        )
+
+        reply = ""
+        for line in response.iter_lines():
+            if not line:
+                continue
+            try:
+                obj = json.loads(line.decode("utf-8"))
+                reply += obj.get("response", "")
+            except Exception:
+                continue
+
+        if not reply.strip():
+            return jsonify({"reply": "(no response from Ollama)"})
+
+        # Wrap code blocks in triple backticks if Ollama generated code
+        if "```" in reply:
+            return jsonify({"reply": reply.strip()})
+        else:
+            return jsonify({"reply": reply.strip()})
+
+    except Exception as e:
+        return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
+
+@app.route("/ping")
+def ping():
+    try:
+        r = requests.get(f"{OLLAMA_URL}/api/tags", timeout=10)
+        return jsonify({"status": "ok", "ollama_status": r.status_code})
+    except Exception as e:
+        return jsonify({"status": "error", "detail": str(e)})
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
