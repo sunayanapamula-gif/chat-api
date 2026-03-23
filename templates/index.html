@@ -60,7 +60,20 @@
     #send-btn:hover {
       background: #13856e;
     }
+    pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 10px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: Consolas, monospace;
+    }
   </style>
+  <!-- Highlight.js for syntax highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 </head>
 <body>
   <div id="chat-container">
@@ -77,12 +90,34 @@
     const input = document.getElementById("message-input");
     const sendBtn = document.getElementById("send-btn");
 
+    function formatReply(text) {
+      // Detect code blocks wrapped in triple backticks
+      const codeBlockRegex = /```([\s\S]*?)```/g;
+      return text.replace(codeBlockRegex, (match, code) => {
+        return `<pre><code>${escapeHtml(code)}</code></pre>`;
+      });
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+    }
+
     function appendMessage(sender, text) {
       const div = document.createElement("div");
       div.classList.add("message");
-      div.innerHTML = `<span class="${sender}">${sender}:</span> ${text}`;
+      if (sender === "ai") {
+        div.innerHTML = `<span class="${sender}">${sender}:</span> ${formatReply(text)}`;
+      } else {
+        div.innerHTML = `<span class="${sender}">${sender}:</span> ${text}`;
+      }
       messagesDiv.appendChild(div);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      // Apply syntax highlighting
+      messagesDiv.querySelectorAll("pre code").forEach(block => {
+        hljs.highlightElement(block);
+      });
     }
 
     async function sendMessage() {
