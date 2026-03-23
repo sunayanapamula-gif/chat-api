@@ -2,23 +2,17 @@
 <html>
 <head>
     <title>Chat API Interface</title>
-    <!-- Prism.js CSS for syntax highlighting -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 10px;
-            background: #f5f5f5;
-        }
+        body { font-family: Arial, sans-serif; margin: 10px; background: #f5f5f5; }
         #chat-box {
             border: 1px solid #ccc;
             padding: 10px;
             width: 100%;
             max-width: 600px;
-            height: 60vh;
+            height: 65vh;
             overflow-y: auto;
             background: #fff;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
@@ -31,73 +25,30 @@
             max-width: 600px;
             margin: 10px auto;
         }
-        #message {
-            flex: 1;
-            padding: 8px;
-            font-size: 1em;
-        }
-        button {
-            padding: 8px 14px;
-            font-size: 1em;
-        }
-        .user {
+        #message { flex: 1; padding: 8px; font-size: 1em; }
+        button { padding: 8px 14px; font-size: 1em; cursor: pointer; }
+        .user, .ai {
             display: inline-block;
-            background: #ff4d4d;
-            color: #fff;
             padding: 8px 12px;
-            border-radius: 20px 20px 5px 20px;
             margin: 6px 0;
-            animation: fadeUp 0.6s ease;
             word-wrap: break-word;
-        }
-        .ai {
-            display: inline-block;
-            background: #0066cc;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 20px 20px 20px 5px;
-            margin: 6px 0;
             animation: fadeUp 0.6s ease;
-            word-wrap: break-word;
         }
-        .typing {
-            font-style: italic;
-            color: gray;
-            margin: 4px 0;
-            display: flex;
-            align-items: center;
-        }
+        .user { background: #ff4d4d; color: #fff; border-radius: 20px 20px 5px 20px; }
+        .ai { background: #0066cc; color: #fff; border-radius: 20px 20px 20px 5px; }
+        .typing { font-style: italic; color: gray; margin: 4px 0; display: flex; align-items: center; }
         .typing span {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            margin-left: 4px;
-            background: gray;
-            border-radius: 50%;
-            animation: bounce 1.2s infinite;
+            display: inline-block; width: 6px; height: 6px; margin-left: 4px;
+            background: gray; border-radius: 50%; animation: bounce 1.2s infinite;
         }
         .typing span:nth-child(2) { animation-delay: 0.2s; }
         .typing span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0.6); }
-            40% { transform: scale(1); }
-        }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0.6); } 40% { transform: scale(1); } }
         .error { color: red; margin: 4px 0; }
-        pre {
-            background: #f0f0f0;
-            padding: 8px;
-            border-radius: 4px;
-            overflow-x: auto;
-        }
+        pre { background: #f0f0f0; padding: 8px; border-radius: 4px; overflow-x: auto; }
         code { font-family: Consolas, monospace; }
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @media (max-width: 600px) {
-            #chat-box { height: 70vh; }
-            h1 { font-size: 1.4em; text-align: center; }
-        }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 600px) { #chat-box { height: 70vh; } h1 { font-size: 1.4em; text-align: center; } }
     </style>
 </head>
 <body>
@@ -138,9 +89,7 @@
                 });
                 const data = await res.json();
 
-                if (chatBox.contains(typingIndicator)) {
-                    chatBox.removeChild(typingIndicator);
-                }
+                if (chatBox.contains(typingIndicator)) chatBox.removeChild(typingIndicator);
 
                 let reply = data.reply || "(no reply)";
                 const aiBubble = document.createElement("div");
@@ -175,7 +124,7 @@
                         if (i < reply.length) {
                             aiBubble.innerHTML += reply.charAt(i);
                             i++;
-                            setTimeout(typeWriter, 30);
+                            setTimeout(typeWriter, 25);
                             chatBox.scrollTop = chatBox.scrollHeight;
                         }
                     }
@@ -185,10 +134,11 @@
                 chatBox.scrollTop = chatBox.scrollHeight;
 
             } catch (err) {
-                if (chatBox.contains(typingIndicator)) {
-                    chatBox.removeChild(typingIndicator);
-                }
-                chatBox.innerHTML += `<p class="error"><b>Error:</b> ${err.message}</p>`;
+                if (chatBox.contains(typingIndicator)) chatBox.removeChild(typingIndicator);
+                const errorBubble = document.createElement("div");
+                errorBubble.className = "error";
+                errorBubble.innerHTML = `<b>Error:</b> ${err.message}`;
+                chatBox.appendChild(errorBubble);
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
         }
@@ -201,7 +151,6 @@
         });
     </script>
 
-    <!-- Prism.js JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
