@@ -19,10 +19,37 @@
         #input-box { margin-top: 10px; }
         #message { width: 400px; padding: 8px; }
         button { padding: 8px 14px; }
-        .user { color: #333; margin: 4px 0; }
-        .ai { color: #0066cc; margin: 4px 0; }
-        .typing { font-style: italic; color: gray; margin: 4px 0; }
+
+        /* User bubble styled like a red flower petal */
+        .user {
+            display: inline-block;
+            background: #ff4d4d;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 20px 20px 5px 20px;
+            margin: 6px 0;
+            animation: fadeUp 0.6s ease;
+        }
+
+        /* AI bubble */
+        .ai {
+            display: inline-block;
+            background: #0066cc;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 20px 20px 20px 5px;
+            margin: 6px 0;
+            animation: fadeUp 0.6s ease;
+        }
+
+        .typing {
+            font-style: italic;
+            color: gray;
+            margin: 4px 0;
+        }
+
         .error { color: red; margin: 4px 0; }
+
         pre {
             background: #f0f0f0;
             padding: 8px;
@@ -31,6 +58,12 @@
         }
         code {
             font-family: Consolas, monospace;
+        }
+
+        /* Fade-up animation */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -49,17 +82,29 @@
             if (!msg) return;
 
             const chatBox = document.getElementById("chat-box");
-            chatBox.innerHTML += `<p class="user"><b>You:</b> ${msg}</p>`;
+
+            // User bubble with fade-up
+            const userBubble = document.createElement("div");
+            userBubble.className = "user";
+            userBubble.innerHTML = `<b>You:</b> ${msg}`;
+            chatBox.appendChild(userBubble);
             chatBox.scrollTop = chatBox.scrollHeight;
 
             msgInput.value = "";
 
-            // Show typing indicator
+            // Typing indicator with animated dots
             const typingIndicator = document.createElement("p");
             typingIndicator.className = "typing";
-            typingIndicator.innerText = "AI is typing...";
+            typingIndicator.innerHTML = "Please wait — the reply is taking a little longer to generate 🙂";
             chatBox.appendChild(typingIndicator);
             chatBox.scrollTop = chatBox.scrollHeight;
+
+            let dots = 0;
+            const interval = setInterval(() => {
+                dots = (dots + 1) % 4;
+                typingIndicator.innerHTML = "Please wait — the reply is taking a little longer to generate 🙂" + ".".repeat(dots);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 500);
 
             try {
                 const res = await fetch("/chat", {
@@ -71,11 +116,12 @@
 
                 if (chatBox.contains(typingIndicator)) {
                     chatBox.removeChild(typingIndicator);
+                    clearInterval(interval);
                 }
 
                 let reply = data.reply;
-                const aiLine = document.createElement("div");
-                aiLine.className = "ai";
+                const aiBubble = document.createElement("div");
+                aiBubble.className = "ai";
 
                 if (reply.includes("```")) {
                     // Extract code block
@@ -96,18 +142,17 @@
                             formatted += `<pre><code class="${lang}">${codeContent.replace(/</g,"&lt;")}</code></pre>`;
                         }
                     }
-                    aiLine.innerHTML = formatted;
-                    chatBox.appendChild(aiLine);
-                    Prism.highlightAllUnder(aiLine); // highlight code
+                    aiBubble.innerHTML = formatted;
+                    chatBox.appendChild(aiBubble);
+                    Prism.highlightAllUnder(aiBubble);
                 } else {
-                    // Typewriter effect for normal text
-                    aiLine.innerHTML = "<b>AI:</b> ";
-                    chatBox.appendChild(aiLine);
+                    aiBubble.innerHTML = "<b>AI:</b> ";
+                    chatBox.appendChild(aiBubble);
 
                     let i = 0;
                     function typeWriter() {
                         if (i < reply.length) {
-                            aiLine.innerHTML += reply.charAt(i);
+                            aiBubble.innerHTML += reply.charAt(i);
                             i++;
                             setTimeout(typeWriter, 30);
                             chatBox.scrollTop = chatBox.scrollHeight;
@@ -116,9 +161,12 @@
                     typeWriter();
                 }
 
+                chatBox.scrollTop = chatBox.scrollHeight;
+
             } catch (err) {
                 if (chatBox.contains(typingIndicator)) {
                     chatBox.removeChild(typingIndicator);
+                    clearInterval(interval);
                 }
                 chatBox.innerHTML += `<p class="error"><b>Error:</b> ${err.message}</p>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
