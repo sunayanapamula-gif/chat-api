@@ -5,17 +5,15 @@ from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
-# Environment variables with safe defaults
+# Read environment variable safely
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434").strip()
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral").strip()
 
-# Log startup values
+# Sanity check: print values to logs
 print(">>> OLLAMA_URL =", OLLAMA_URL)
-print(">>> OLLAMA_MODEL =", OLLAMA_MODEL)
 print(">>> WEB_CONCURRENCY =", os.getenv("WEB_CONCURRENCY"))
 print(">>> TIMEOUT =", os.getenv("TIMEOUT"))
 
-# Serve index.html from templates/
+# Serve index.html from templates folder
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -23,14 +21,15 @@ def index():
 # Chat route
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_input = request.json.get("message", "").strip()
+    user_input = request.json.get("message", "")
     if not user_input:
         return jsonify({"reply": "(no input)"})
 
     try:
+        # Call Ollama through Cloudflare Tunnel or local
         response = requests.post(
             f"{OLLAMA_URL}/api/generate",
-            json={"model": OLLAMA_MODEL, "prompt": user_input},
+            json={"model": "mistral", "prompt": user_input},
             stream=True,
             timeout=120
         )
@@ -45,16 +44,10 @@ def chat():
             except Exception:
                 continue
 
-        reply = reply.strip()
-        if not reply:
-            return jsonify({"reply": "(no response from Ollama)"})
+        return jsonify({"reply": reply.strip() or "(no response)"})
 
-        return jsonify({"reply": reply})
-
-    except requests.exceptions.RequestException as e:
-        return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
     except Exception as e:
-        return jsonify({"reply": f"Unexpected error: {str(e)}"})
+        return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
 
 # Health-check route
 @app.route("/ping")
