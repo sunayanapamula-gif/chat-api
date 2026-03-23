@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 # Hugging Face setup
 HF_TOKEN = os.getenv("HF_TOKEN")  # set this in Railway variables
-HF_MODEL = "mistralai/Mistral-7B-Instruct-v0.3"
+HF_MODEL = os.getenv("HF_MODEL", "mistralai/Mistral-7B-Instruct-v0.3")
 
 @app.route("/")
 def index():
