@@ -37,6 +37,10 @@
     .ai {
       color: #16a085;
     }
+    .error {
+      color: #e74c3c;
+      font-weight: bold;
+    }
     #input-container {
       display: flex;
     }
@@ -70,6 +74,10 @@
     code {
       font-family: Consolas, monospace;
     }
+    #loading {
+      font-style: italic;
+      color: #888;
+    }
   </style>
   <!-- Highlight.js for syntax highlighting -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
@@ -91,7 +99,6 @@
     const sendBtn = document.getElementById("send-btn");
 
     function formatReply(text) {
-      // Detect code blocks wrapped in triple backticks
       const codeBlockRegex = /```([\s\S]*?)```/g;
       return text.replace(codeBlockRegex, (match, code) => {
         return `<pre><code>${escapeHtml(code)}</code></pre>`;
@@ -104,17 +111,18 @@
                 .replace(/>/g, "&gt;");
     }
 
-    function appendMessage(sender, text) {
+    function appendMessage(sender, text, isError=false) {
       const div = document.createElement("div");
       div.classList.add("message");
-      if (sender === "ai") {
+      if (isError) {
+        div.innerHTML = `<span class="error">Error:</span> ${text}`;
+      } else if (sender === "ai") {
         div.innerHTML = `<span class="${sender}">${sender}:</span> ${formatReply(text)}`;
       } else {
         div.innerHTML = `<span class="${sender}">${sender}:</span> ${text}`;
       }
       messagesDiv.appendChild(div);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      // Apply syntax highlighting
       messagesDiv.querySelectorAll("pre code").forEach(block => {
         hljs.highlightElement(block);
       });
@@ -126,16 +134,30 @@
       appendMessage("user", text);
       input.value = "";
 
+      const loadingDiv = document.createElement("div");
+      loadingDiv.id = "loading";
+      loadingDiv.textContent = "AI is thinking...";
+      messagesDiv.appendChild(loadingDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
       try {
         const response = await fetch("/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: text })
         });
+
         const data = await response.json();
-        appendMessage("ai", data.reply);
+        loadingDiv.remove();
+
+        if (data.reply) {
+          appendMessage("ai", data.reply);
+        } else {
+          appendMessage("ai", "(no response from Ollama)", true);
+        }
       } catch (err) {
-        appendMessage("ai", "Error: " + err.message);
+        loadingDiv.remove();
+        appendMessage("ai", err.message, true);
       }
     }
 
