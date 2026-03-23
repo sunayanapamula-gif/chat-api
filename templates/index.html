@@ -1,63 +1,115 @@
-import os
-import requests
-import json
-from flask import Flask, request, jsonify, render_template
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Board</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    #chat-container {
+      width: 80%;
+      max-width: 800px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    #messages {
+      height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 20px;
+      white-space: pre-wrap;
+    }
+    .message {
+      margin: 8px 0;
+    }
+    .user {
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    .ai {
+      color: #16a085;
+    }
+    #input-container {
+      display: flex;
+    }
+    #message-input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    #send-btn {
+      padding: 10px 20px;
+      margin-left: 10px;
+      font-size: 16px;
+      background: #16a085;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #send-btn:hover {
+      background: #13856e;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <h2>Chat Board</h2>
+    <div id="messages"></div>
+    <div id="input-container">
+      <input type="text" id="message-input" placeholder="Type your message here..." />
+      <button id="send-btn">Send</button>
+    </div>
+  </div>
 
-app = Flask(__name__)
+  <script>
+    const messagesDiv = document.getElementById("messages");
+    const input = document.getElementById("message-input");
+    const sendBtn = document.getElementById("send-btn");
 
-OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434").strip()
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral").strip()
+    function appendMessage(sender, text) {
+      const div = document.createElement("div");
+      div.classList.add("message");
+      div.innerHTML = `<span class="${sender}">${sender}:</span> ${text}`;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
 
-print(">>> OLLAMA_URL =", OLLAMA_URL)
-print(">>> OLLAMA_MODEL =", OLLAMA_MODEL)
+    async function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+      appendMessage("user", text);
+      input.value = "";
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text })
+        });
+        const data = await response.json();
+        appendMessage("ai", data.reply);
+      } catch (err) {
+        appendMessage("ai", "Error: " + err.message);
+      }
+    }
 
-@app.route("/chat", methods=["POST"])
-def chat():
-    user_input = request.json.get("message", "")
-    if not user_input:
-        return jsonify({"reply": "(no input)"})
-
-    try:
-        response = requests.post(
-            f"{OLLAMA_URL}/api/generate",
-            json={"model": OLLAMA_MODEL, "prompt": user_input},
-            stream=True,
-            timeout=120
-        )
-
-        reply = ""
-        for line in response.iter_lines():
-            if not line:
-                continue
-            try:
-                obj = json.loads(line.decode("utf-8"))
-                reply += obj.get("response", "")
-            except Exception:
-                continue
-
-        if not reply.strip():
-            return jsonify({"reply": "(no response from Ollama)"})
-
-        # Wrap code blocks in triple backticks if Ollama generated code
-        if "```" in reply:
-            return jsonify({"reply": reply.strip()})
-        else:
-            return jsonify({"reply": reply.strip()})
-
-    except Exception as e:
-        return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
-
-@app.route("/ping")
-def ping():
-    try:
-        r = requests.get(f"{OLLAMA_URL}/api/tags", timeout=10)
-        return jsonify({"status": "ok", "ollama_status": r.status_code})
-    except Exception as e:
-        return jsonify({"status": "error", "detail": str(e)})
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    sendBtn.addEventListener("click", sendMessage);
+    input.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>
