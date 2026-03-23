@@ -11,121 +11,79 @@
       padding: 0;
     }
     #chat-container {
-      width: 80%;
-      max-width: 800px;
+      width: 600px;
       margin: 40px auto;
       background: #fff;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      height: 80vh;
     }
     #messages {
-      height: 400px;
+      flex: 1;
+      padding: 20px;
       overflow-y: auto;
-      border: 1px solid #ddd;
-      padding: 10px;
-      margin-bottom: 20px;
-      white-space: pre-wrap;
     }
     .message {
-      margin: 8px 0;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 6px;
+      max-width: 80%;
+      word-wrap: break-word;
     }
     .user {
-      font-weight: bold;
-      color: #2c3e50;
+      background: #d1e7dd;
+      align-self: flex-end;
     }
     .ai {
-      color: #16a085;
-    }
-    .error {
-      color: #e74c3c;
-      font-weight: bold;
+      background: #e2e3e5;
+      align-self: flex-start;
     }
     #input-container {
       display: flex;
+      border-top: 1px solid #ccc;
     }
-    #message-input {
+    #input {
       flex: 1;
       padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-    #send-btn {
-      padding: 10px 20px;
-      margin-left: 10px;
-      font-size: 16px;
-      background: #16a085;
-      color: #fff;
       border: none;
-      border-radius: 4px;
+      border-radius: 0;
+      font-size: 16px;
+    }
+    #send {
+      padding: 10px 20px;
+      border: none;
+      background: #0d6efd;
+      color: #fff;
+      font-size: 16px;
       cursor: pointer;
     }
-    #send-btn:hover {
-      background: #13856e;
-    }
-    pre {
-      background: #2d2d2d;
-      color: #f8f8f2;
-      padding: 10px;
-      border-radius: 6px;
-      overflow-x: auto;
-    }
-    code {
-      font-family: Consolas, monospace;
-    }
-    #loading {
-      font-style: italic;
-      color: #888;
+    #send:hover {
+      background: #0b5ed7;
     }
   </style>
-  <!-- Highlight.js for syntax highlighting -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 </head>
 <body>
   <div id="chat-container">
-    <h2>Chat Board</h2>
     <div id="messages"></div>
     <div id="input-container">
-      <input type="text" id="message-input" placeholder="Type your message here..." />
-      <button id="send-btn">Send</button>
+      <input id="input" type="text" placeholder="Type a message...">
+      <button id="send">Send</button>
     </div>
   </div>
 
   <script>
     const messagesDiv = document.getElementById("messages");
-    const input = document.getElementById("message-input");
-    const sendBtn = document.getElementById("send-btn");
+    const input = document.getElementById("input");
+    const sendBtn = document.getElementById("send");
 
-    function formatReply(text) {
-      const codeBlockRegex = /```([\s\S]*?)```/g;
-      return text.replace(codeBlockRegex, (match, code) => {
-        return `<pre><code>${escapeHtml(code)}</code></pre>`;
-      });
-    }
-
-    function escapeHtml(str) {
-      return str.replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;");
-    }
-
-    function appendMessage(sender, text, isError=false) {
-      const div = document.createElement("div");
-      div.classList.add("message");
-      if (isError) {
-        div.innerHTML = `<span class="error">Error:</span> ${text}`;
-      } else if (sender === "ai") {
-        div.innerHTML = `<span class="${sender}">${sender}:</span> ${formatReply(text)}`;
-      } else {
-        div.innerHTML = `<span class="${sender}">${sender}:</span> ${text}`;
-      }
-      messagesDiv.appendChild(div);
+    function appendMessage(sender, text) {
+      const msg = document.createElement("div");
+      msg.classList.add("message", sender);
+      msg.textContent = text;
+      messagesDiv.appendChild(msg);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      messagesDiv.querySelectorAll("pre code").forEach(block => {
-        hljs.highlightElement(block);
-      });
     }
 
     async function sendMessage() {
@@ -134,12 +92,6 @@
       appendMessage("user", text);
       input.value = "";
 
-      const loadingDiv = document.createElement("div");
-      loadingDiv.id = "loading";
-      loadingDiv.textContent = "AI is thinking...";
-      messagesDiv.appendChild(loadingDiv);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
       try {
         const response = await fetch("/chat", {
           method: "POST",
@@ -147,25 +99,28 @@
           body: JSON.stringify({ message: text })
         });
 
-        const data = await response.json();
-        loadingDiv.remove();
+        if (!response.ok) {
+          const errText = await response.text();
+          appendMessage("ai", `HTTP ${response.status}: ${errText}`);
+          return;
+        }
 
-        if (data.reply) {
-          appendMessage("ai", data.reply);
+        const data = await response.json();
+        if (data.response) {
+          appendMessage("ai", data.response);
+        } else if (data.error) {
+          appendMessage("ai", "Error: " + data.error);
         } else {
-          appendMessage("ai", "(no response from Ollama)", true);
+          appendMessage("ai", "No reply received.");
         }
       } catch (err) {
-        loadingDiv.remove();
-        appendMessage("ai", err.message, true);
+        appendMessage("ai", "Network error: " + err.message);
       }
     }
 
     sendBtn.addEventListener("click", sendMessage);
-    input.addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        sendMessage();
-      }
+    input.addEventListener("keypress", e => {
+      if (e.key === "Enter") sendMessage();
     });
   </script>
 </body>
