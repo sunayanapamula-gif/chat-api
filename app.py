@@ -27,7 +27,7 @@ def chat():
             f"{OLLAMA_URL}/api/generate",
             json={"model": OLLAMA_MODEL, "prompt": user_input},
             stream=True,
-            timeout=300   # longer timeout for Railway/ngrok
+            timeout=300
         )
 
         reply_parts = []
@@ -37,9 +37,12 @@ def chat():
             print("Ollama raw line:", line)   # Debug log for Railway
             try:
                 obj = json.loads(line)
-                piece = obj.get("response", "")
-                if piece:
-                    reply_parts.append(piece)
+                # Ollama streams multiple keys, but "response" is the text
+                if "response" in obj and obj["response"]:
+                    reply_parts.append(obj["response"])
+                # If Ollama signals done, break early
+                if obj.get("done", False):
+                    break
             except Exception as e:
                 print("Parse error:", e)
                 continue
