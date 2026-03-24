@@ -5,13 +5,9 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Ollama server + model
+# Environment variables
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434").strip()
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral:latest").strip()
-
-print(">>> OLLAMA_URL =", OLLAMA_URL)
-print(">>> OLLAMA_MODEL =", OLLAMA_MODEL)
-
 
 @app.route("/chat", methods=["POST"])
 def chat():
