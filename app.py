@@ -35,28 +35,24 @@ def chat():
     }
 
     try:
+        # Non-streaming request: simpler, returns full JSON
         r = requests.post(
             f"{OLLAMA_URL}/api/generate",
             json=payload,
             headers={
                 "Content-Type": "application/json",
                 "ngrok-skip-browser-warning": "true"
-            },
-            stream=True
+            }
         )
 
-        output = ""
-        for line in r.iter_lines():
-            if line:
-                try:
-                    chunk = line.decode("utf-8")
-                    json_data = json.loads(chunk)
-                    if "response" in json_data:
-                        output += json_data["response"]
-                except Exception:
-                    pass
+        if r.status_code != 200:
+            return jsonify({"error": f"Ollama returned {r.status_code}"}), r.status_code
 
-        return jsonify({"response": output.strip()})
+        resp_json = r.json()
+        # Ollama returns {"response": "...", "done": true, ...}
+        reply = resp_json.get("response", "").strip()
+
+        return jsonify({"response": reply})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
