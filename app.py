@@ -28,7 +28,7 @@ def chat():
         return jsonify({"reply": "(no input)"})
 
     try:
-        # Call Ollama through Cloudflare Tunnel or local
+        # Call Ollama through ngrok/Cloudflare Tunnel or local
         response = requests.post(
             f"{OLLAMA_URL}/api/generate",
             json={"model": OLLAMA_MODEL, "prompt": user_input},
