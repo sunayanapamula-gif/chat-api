@@ -29,7 +29,7 @@ def chat():
         response = requests.post(
             f"{OLLAMA_URL}/api/generate",
             json={"model": OLLAMA_MODEL, "prompt": user_input},
-            headers=NGROK_HEADERS,   # ✅ bypass ngrok warning
+            headers=NGROK_HEADERS,   # ✅ critical fix
             stream=True,
             timeout=300
         )
@@ -38,7 +38,7 @@ def chat():
         for line in response.iter_lines(decode_unicode=True):
             if not line:
                 continue
-            print("Ollama raw line:", line)   # Debug log for Railway
+            print("Ollama raw line:", line)
             try:
                 obj = json.loads(line)
                 if "response" in obj and obj["response"]:
@@ -63,7 +63,7 @@ def ping():
     try:
         r = requests.get(
             f"{OLLAMA_URL}/api/tags",
-            headers=NGROK_HEADERS,   # ✅ bypass ngrok warning
+            headers=NGROK_HEADERS,   # ✅ critical fix
             timeout=10
         )
         return jsonify({"status": "ok", "ollama_status": r.status_code})
