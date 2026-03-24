@@ -18,6 +18,31 @@
         .error { color: red; margin: 4px 0; }
         pre { background: #f0f0f0; padding: 8px; border-radius: 4px; overflow-x: auto; }
         code { font-family: Consolas, monospace; }
+
+        /* Typing animation */
+        .typing {
+            font-style: italic;
+            color: gray;
+            margin: 4px 0;
+            display: flex;
+            align-items: center;
+        }
+        .typing span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            margin-left: 4px;
+            background: gray;
+            border-radius: 50%;
+            animation: bounce 1.2s infinite;
+        }
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0.6); }
+            40% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
@@ -44,8 +69,10 @@
 
             msgInput.value = "";
 
+            // Typing indicator
             const typingIndicator = document.createElement("p");
-            typingIndicator.innerHTML = "Please wait — generating reply...";
+            typingIndicator.className = "typing";
+            typingIndicator.innerHTML = "AI is typing <span></span><span></span><span></span>";
             chatBox.appendChild(typingIndicator);
             chatBox.scrollTop = chatBox.scrollHeight;
 
