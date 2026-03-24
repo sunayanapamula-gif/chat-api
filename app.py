@@ -57,7 +57,7 @@ def ping():
         r = requests.get(f"{OLLAMA_URL}/api/tags", timeout=10)
         return jsonify({"status": "ok", "ollama_status": r.status_code})
     except Exception as e:
-        return jsonify({"status": "error", "detail": str(e)}")
+        return jsonify({"status": "error", "detail": str(e)})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
