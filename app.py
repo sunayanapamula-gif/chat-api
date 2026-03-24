@@ -35,12 +35,14 @@ def chat():
                     if line:
                         try:
                             obj = json.loads(line.decode("utf-8"))
+                            # Stream raw response text
                             yield obj.get("response", "")
                         except Exception:
                             pass
         except Exception as e:
             yield f"Error contacting Ollama: {str(e)}"
 
+    # Stream plain text back to the client
     return Response(generate(), mimetype="text/plain")
 
 # Health-check route
