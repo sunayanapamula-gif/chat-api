@@ -1,16 +1,19 @@
+import os
 import requests
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Directly use your ngrok tunnel URL
 OLLAMA_URL = "https://nonsuppressed-glottal-tonette.ngrok-free.dev"
 OLLAMA_MODEL = "mistral:latest"
+
+@app.route("/")
+def home():
+    return "OK"
 
 @app.route("/ping", methods=["GET"])
 def ping():
     try:
-        # Simple health check to Ollama
         r = requests.get(
             f"{OLLAMA_URL}/api/tags",
             headers={"ngrok-skip-browser-warning": "true"}
@@ -40,7 +43,6 @@ def chat():
             stream=True
         )
 
-        # Collect streamed response
         output = ""
         for line in r.iter_lines():
             if line:
@@ -55,4 +57,5 @@ def chat():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
