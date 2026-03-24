@@ -12,6 +12,9 @@ OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral:latest").strip()
 print(">>> OLLAMA_URL =", OLLAMA_URL)
 print(">>> OLLAMA_MODEL =", OLLAMA_MODEL)
 
+# Common headers for ngrok free tunnels
+NGROK_HEADERS = {"ngrok-skip-browser-warning": "true"}
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -26,7 +29,7 @@ def chat():
         response = requests.post(
             f"{OLLAMA_URL}/api/generate",
             json={"model": OLLAMA_MODEL, "prompt": user_input},
-            headers={"ngrok-skip-browser-warning": "true"},  # ✅ bypass ngrok warning
+            headers=NGROK_HEADERS,   # ✅ bypass ngrok warning
             stream=True,
             timeout=300
         )
@@ -60,7 +63,7 @@ def ping():
     try:
         r = requests.get(
             f"{OLLAMA_URL}/api/tags",
-            headers={"ngrok-skip-browser-warning": "true"},  # ✅ bypass ngrok warning
+            headers=NGROK_HEADERS,   # ✅ bypass ngrok warning
             timeout=10
         )
         return jsonify({"status": "ok", "ollama_status": r.status_code})
