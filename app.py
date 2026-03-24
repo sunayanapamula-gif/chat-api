@@ -1,28 +1,31 @@
 import os
-import requests
-import json
+import subprocess
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
-CORS(app)  # allow cross-origin requests from your frontend
+CORS(app)
 
-# IMPORTANT: update this each time you restart ngrok
-OLLAMA_URL = "https://nonsuppressed-glottal-tonette.ngrok-free.dev"
 OLLAMA_MODEL = "mistral:latest"
 
 @app.route("/")
 def home():
-    return render_template("index.html")   # index.html goes in /templates
+    return render_template("index.html")
 
 @app.route("/ping", methods=["GET"])
 def ping():
     try:
-        r = requests.get(
-            f"{OLLAMA_URL}/api/tags",
-            headers={"ngrok-skip-browser-warning": "true"}
+        # Try a simple run to see if Ollama responds
+        result = subprocess.run(
+            ["ollama", "run", OLLAMA_MODEL],
+            input="ping".encode("utf-8"),
+            capture_output=True,
+            timeout=10
         )
-        return jsonify({"status": "ok", "ollama_status": r.status_code})
+        if result.returncode == 0:
+            return jsonify({"status": "ok", "ollama_status": 200})
+        else:
+            return jsonify({"status": "error", "ollama_status": result.returncode}), 500
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
@@ -31,41 +34,22 @@ def chat():
     data = request.get_json(force=True)
     user_input = data.get("message", "")
 
-    payload = {
-        "model": OLLAMA_MODEL,
-        "prompt": user_input
-    }
-
     try:
-        r = requests.post(
-            f"{OLLAMA_URL}/api/generate",
-            json=payload,
-            headers={
-                "Content-Type": "application/json",
-                "ngrok-skip-browser-warning": "true"
-            },
-            stream=True
+        result = subprocess.run(
+            ["ollama", "run", OLLAMA_MODEL],
+            input=user_input.encode("utf-8"),
+            capture_output=True,
+            timeout=60
         )
 
-        if r.status_code != 200:
-            return jsonify({"error": f"Ollama returned {r.status_code}"}), r.status_code
+        if result.returncode != 0:
+            return jsonify({"error": f"Ollama failed with code {result.returncode}"}), 500
 
-        reply = ""
-        for line in r.iter_lines():
-            if line:
-                decoded = line.decode("utf-8")
-                try:
-                    obj = json.loads(decoded)
-                    if "response" in obj:
-                        reply += obj["response"]
-                except Exception:
-                    continue
-
-        return jsonify({"response": reply.strip()})
+        reply = result.stdout.decode("utf-8").strip()
+        return jsonify({"response": reply})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    # Railway expects your app to bind to 0.0.0.0 and PORT=8080
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
