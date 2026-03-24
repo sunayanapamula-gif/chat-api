@@ -20,7 +20,7 @@
         #message { width: 400px; padding: 8px; }
         button { padding: 8px 14px; }
         .user { color: #333; margin: 4px 0; }
-        .bot { color: #0066cc; margin: 4px 0; }
+        .ai { color: #0066cc; margin: 4px 0; }
         .typing { font-style: italic; color: gray; margin: 4px 0; }
         .error { color: red; margin: 4px 0; }
         pre {
@@ -57,7 +57,7 @@
             // Show typing indicator
             const typingIndicator = document.createElement("p");
             typingIndicator.className = "typing";
-            typingIndicator.innerText = "Bot is typing...";
+            typingIndicator.innerText = "AI is typing...";
             chatBox.appendChild(typingIndicator);
             chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -74,40 +74,40 @@
                 }
 
                 let reply = data.reply;
-                const botLine = document.createElement("div");
-                botLine.className = "bot";
+                const aiLine = document.createElement("div");
+                aiLine.className = "ai";
 
                 if (reply.includes("```")) {
                     // Extract code block
                     const parts = reply.split("```");
-                    let formatted = "<b>Bot:</b> ";
+                    let formatted = "<b>AI:</b> ";
                     for (let i = 0; i < parts.length; i++) {
                         if (i % 2 === 0) {
                             formatted += parts[i];
                         } else {
-                            // Try to detect language (e.g., ```python)
+                            // Detect language (e.g., ```python)
                             const langParts = parts[i].trim().split("\n");
                             let lang = "language-python"; // default
                             if (langParts[0].match(/^[a-zA-Z]+$/)) {
                                 lang = "language-" + langParts[0].toLowerCase();
-                                langParts.shift(); // remove language line
+                                langParts.shift();
                             }
                             const codeContent = langParts.join("\n");
                             formatted += `<pre><code class="${lang}">${codeContent.replace(/</g,"&lt;")}</code></pre>`;
                         }
                     }
-                    botLine.innerHTML = formatted;
-                    chatBox.appendChild(botLine);
-                    Prism.highlightAllUnder(botLine); // highlight code
+                    aiLine.innerHTML = formatted;
+                    chatBox.appendChild(aiLine);
+                    Prism.highlightAllUnder(aiLine); // highlight code
                 } else {
                     // Typewriter effect for normal text
-                    botLine.innerHTML = "<b>Bot:</b> ";
-                    chatBox.appendChild(botLine);
+                    aiLine.innerHTML = "<b>AI:</b> ";
+                    chatBox.appendChild(aiLine);
 
                     let i = 0;
                     function typeWriter() {
                         if (i < reply.length) {
-                            botLine.innerHTML += reply.charAt(i);
+                            aiLine.innerHTML += reply.charAt(i);
                             i++;
                             setTimeout(typeWriter, 30);
                             chatBox.scrollTop = chatBox.scrollHeight;
