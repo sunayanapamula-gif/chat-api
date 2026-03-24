@@ -1,43 +1,98 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Chat Board</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f4; }
-    #chatBox { width: 600px; margin: 20px auto; padding: 10px; background: white; border: 1px solid #ccc; }
-    .user { color: blue; }
-    .ai { color: green; }
-  </style>
+    <title>Chat API Interface</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        #chat-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 500px;
+            height: 350px;
+            overflow-y: auto;
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        #input-box { margin-top: 10px; }
+        #message { width: 400px; padding: 8px; }
+        button { padding: 8px 14px; }
+        .user { color: #333; margin: 4px 0; }
+        .bot { color: #0066cc; margin: 4px 0; }
+        .typing { font-style: italic; color: gray; margin: 4px 0; }
+        .error { color: red; margin: 4px 0; }
+    </style>
 </head>
 <body>
-  <div id="chatBox"></div>
-  <input id="userInput" type="text" placeholder="Type a message..." />
-  <button onclick="sendMessage()">Send</button>
+    <h1>Chat API Interface</h1>
+    <div id="chat-box"></div>
+    <div id="input-box">
+        <input type="text" id="message" placeholder="Type your message..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
 
-  <script>
-    async function sendMessage() {
-      const input = document.getElementById("userInput").value;
-      const chatBox = document.getElementById("chatBox");
+    <script>
+        async function sendMessage() {
+            const msgInput = document.getElementById("message");
+            const msg = msgInput.value.trim();
+            if (!msg) return;
 
-      chatBox.innerHTML += `<div class="user">You: ${input}</div>`;
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += `<p class="user"><b>You:</b> ${msg}</p>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
 
-      const response = await fetch("/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input })
-      });
+            msgInput.value = "";
 
-      const data = await response.json();
+            // Show typing indicator
+            const typingIndicator = document.createElement("p");
+            typingIndicator.className = "typing";
+            typingIndicator.innerText = "Bot is typing...";
+            chatBox.appendChild(typingIndicator);
+            chatBox.scrollTop = chatBox.scrollHeight;
 
-      // ✅ Show AI reply or error
-      if (data.reply) {
-        chatBox.innerHTML += `<div class="ai">AI: ${data.reply}</div>`;
-      } else if (data.error) {
-        chatBox.innerHTML += `<div class="ai">Error: ${data.error}</div>`;
-      } else {
-        chatBox.innerHTML += `<div class="ai">AI: (no reply)</div>`;
-      }
-    }
-  </script>
+            try {
+                const res = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: msg })
+                });
+                const data = await res.json();
+
+                if (chatBox.contains(typingIndicator)) {
+                    chatBox.removeChild(typingIndicator);
+                }
+
+                // Typewriter effect for bot reply
+                const botLine = document.createElement("p");
+                botLine.className = "bot";
+                botLine.innerHTML = "<b>Bot:</b> ";
+                chatBox.appendChild(botLine);
+
+                let i = 0;
+                function typeWriter() {
+                    if (i < data.reply.length) {
+                        botLine.innerHTML += data.reply.charAt(i);
+                        i++;
+                        setTimeout(typeWriter, 30);
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    }
+                }
+                typeWriter();
+            } catch (err) {
+                if (chatBox.contains(typingIndicator)) {
+                    chatBox.removeChild(typingIndicator);
+                }
+                chatBox.innerHTML += `<p class="error"><b>Error:</b> ${err.message}</p>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }
+
+        // Enter key shortcut
+        document.getElementById("message").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
 </body>
 </html>
