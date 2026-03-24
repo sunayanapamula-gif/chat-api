@@ -13,7 +13,6 @@
             margin: 10px;
             background: #f5f5f5;
         }
-
         #chat-box {
             border: 1px solid #ccc;
             padding: 10px;
@@ -25,7 +24,6 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             margin: 0 auto;
         }
-
         #input-box {
             margin-top: 10px;
             display: flex;
@@ -33,18 +31,15 @@
             max-width: 600px;
             margin: 10px auto;
         }
-
         #message {
             flex: 1;
             padding: 8px;
             font-size: 1em;
         }
-
         button {
             padding: 8px 14px;
             font-size: 1em;
         }
-
         .user {
             display: inline-block;
             background: #ff4d4d;
@@ -55,7 +50,6 @@
             animation: fadeUp 0.6s ease;
             word-wrap: break-word;
         }
-
         .ai {
             display: inline-block;
             background: #0066cc;
@@ -66,7 +60,6 @@
             animation: fadeUp 0.6s ease;
             word-wrap: break-word;
         }
-
         .typing {
             font-style: italic;
             color: gray;
@@ -74,7 +67,6 @@
             display: flex;
             align-items: center;
         }
-
         .typing span {
             display: inline-block;
             width: 6px;
@@ -86,37 +78,25 @@
         }
         .typing span:nth-child(2) { animation-delay: 0.2s; }
         .typing span:nth-child(3) { animation-delay: 0.4s; }
-
         @keyframes bounce {
             0%, 80%, 100% { transform: scale(0.6); }
             40% { transform: scale(1); }
         }
-
         .error { color: red; margin: 4px 0; }
-
         pre {
             background: #f0f0f0;
             padding: 8px;
             border-radius: 4px;
             overflow-x: auto;
         }
-        code {
-            font-family: Consolas, monospace;
-        }
-
+        code { font-family: Consolas, monospace; }
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         @media (max-width: 600px) {
-            #chat-box {
-                height: 70vh;
-            }
-            h1 {
-                font-size: 1.4em;
-                text-align: center;
-            }
+            #chat-box { height: 70vh; }
+            h1 { font-size: 1.4em; text-align: center; }
         }
     </style>
 </head>
@@ -151,7 +131,6 @@
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                // Use relative URL if served by Flask, otherwise fallback to full origin
                 const res = await fetch(window.location.origin + "/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -217,7 +196,7 @@
         document.getElementById("message").addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
-                sendMessage(;
+                sendMessage();
             }
         });
     </script>
