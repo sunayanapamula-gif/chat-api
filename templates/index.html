@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <title>Chat API Interface</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
@@ -23,7 +23,7 @@
     <div id="chat-box"></div>
     <div id="input-box">
         <input type="text" id="message" placeholder="Type your message..." />
-        <button id="sendButton">Send</button>
+        <button onclick="sendMessage()">Send</button>
     </div>
 
     <script>
@@ -34,7 +34,6 @@
 
             const chatBox = document.getElementById("chat-box");
 
-            // Show user message
             const userBubble = document.createElement("div");
             userBubble.className = "user";
             userBubble.innerHTML = `<b>You:</b> ${msg}`;
@@ -43,7 +42,6 @@
 
             msgInput.value = "";
 
-            // Show typing indicator
             const typingIndicator = document.createElement("p");
             typingIndicator.className = "typing";
             typingIndicator.innerHTML = "Please wait — generating reply...";
@@ -51,8 +49,8 @@
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                // IMPORTANT: use your ngrok URL here
-                const res = await fetch("https://nonsuppressed-glottal-tonette.ngrok-free.dev/chat", {
+                // Call your Railway app directly
+                const res = await fetch("https://chat-api-production-ebc8.up.railway.app/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ message: msg })
@@ -63,10 +61,9 @@
                     chatBox.removeChild(typingIndicator);
                 }
 
-                const reply = data.reply || "(No reply received)";
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
-                aiBubble.innerHTML = `<b>AI:</b> ${reply}`;
+                aiBubble.innerHTML = `<b>AI:</b> ${data.reply}`;
                 chatBox.appendChild(aiBubble);
                 chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -79,10 +76,6 @@
             }
         }
 
-        // Bind Send button
-        document.getElementById("sendButton").addEventListener("click", sendMessage);
-
-        // Bind Enter key
         document.getElementById("message").addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
