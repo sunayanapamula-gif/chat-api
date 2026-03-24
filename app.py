@@ -26,6 +26,7 @@ def chat():
         response = requests.post(
             f"{OLLAMA_URL}/api/generate",
             json={"model": OLLAMA_MODEL, "prompt": user_input},
+            headers={"ngrok-skip-browser-warning": "true"},  # ✅ bypass ngrok warning
             stream=True,
             timeout=300
         )
@@ -37,10 +38,8 @@ def chat():
             print("Ollama raw line:", line)   # Debug log for Railway
             try:
                 obj = json.loads(line)
-                # Ollama streams multiple keys, but "response" is the text
                 if "response" in obj and obj["response"]:
                     reply_parts.append(obj["response"])
-                # If Ollama signals done, break early
                 if obj.get("done", False):
                     break
             except Exception as e:
@@ -59,7 +58,11 @@ def chat():
 @app.route("/ping")
 def ping():
     try:
-        r = requests.get(f"{OLLAMA_URL}/api/tags", timeout=10)
+        r = requests.get(
+            f"{OLLAMA_URL}/api/tags",
+            headers={"ngrok-skip-browser-warning": "true"},  # ✅ bypass ngrok warning
+            timeout=10
+        )
         return jsonify({"status": "ok", "ollama_status": r.status_code})
     except Exception as e:
         return jsonify({"status": "error", "detail": str(e)})
