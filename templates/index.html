@@ -51,37 +51,22 @@
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                // Direct call to Ollama API
-                const res = await fetch("http://127.0.0.1:11434/api/generate", {
+                // IMPORTANT: use your ngrok URL here
+                const res = await fetch("https://nonsuppressed-glottal-tonette.ngrok-free.dev/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ model: "mistral:latest", prompt: msg })
+                    body: JSON.stringify({ message: msg })
                 });
-
-                const reader = res.body.getReader();
-                let reply = "";
-
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    const chunk = new TextDecoder().decode(value).trim();
-                    if (chunk) {
-                        try {
-                            const obj = JSON.parse(chunk);
-                            reply += obj.response || "";
-                        } catch (e) {
-                            // skip malformed chunks
-                        }
-                    }
-                }
+                const data = await res.json();
 
                 if (chatBox.contains(typingIndicator)) {
                     chatBox.removeChild(typingIndicator);
                 }
 
+                const reply = data.reply || "(No reply received)";
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
-                aiBubble.innerHTML = `<b>AI:</b> ${reply || "(no response)"}`;
+                aiBubble.innerHTML = `<b>AI:</b> ${reply}`;
                 chatBox.appendChild(aiBubble);
                 chatBox.scrollTop = chatBox.scrollHeight;
 
