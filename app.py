@@ -5,8 +5,9 @@ from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
+# Ollama server + model
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434").strip()
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral").strip()
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral:latest").strip()
 
 print(">>> OLLAMA_URL =", OLLAMA_URL)
 print(">>> OLLAMA_MODEL =", OLLAMA_MODEL)
@@ -42,14 +43,11 @@ def chat():
         if not reply.strip():
             return jsonify({"reply": "(no response from Ollama)"})
 
-        # Wrap code blocks in triple backticks if Ollama generated code
-        if "```" in reply:
-            return jsonify({"reply": reply.strip()})
-        else:
-            return jsonify({"reply": reply.strip()})
+        return jsonify({"reply": reply.strip()})
 
     except Exception as e:
         return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
+
 
 @app.route("/ping")
 def ping():
@@ -58,6 +56,7 @@ def ping():
         return jsonify({"status": "ok", "ollama_status": r.status_code})
     except Exception as e:
         return jsonify({"status": "error", "detail": str(e)})
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
