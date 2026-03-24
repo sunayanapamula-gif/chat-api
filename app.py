@@ -7,9 +7,13 @@ from flask_cors import CORS
 app = Flask(__name__, static_folder="static", template_folder="templates")
 CORS(app)
 
+# Configuration
 OLLAMA_MODEL = "mistral:latest"
+# If you’re exposing Ollama via ngrok, put your forwarding URL here
+# Example: "https://nonsuppressed-glottal-tonette.ngrok-free.dev"
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
 
-# Start Ollama process once
+# Start Ollama process once (using run mode, not serve)
 ollama_proc = subprocess.Popen(
     ["ollama", "run", OLLAMA_MODEL],
     stdin=subprocess.PIPE,
@@ -23,11 +27,9 @@ ollama_lock = threading.Lock()
 
 def ask_ollama(prompt: str) -> str:
     with ollama_lock:
-        # Send prompt
         ollama_proc.stdin.write(prompt + "\n")
         ollama_proc.stdin.flush()
 
-        # Collect response until Ollama finishes this turn
         reply_lines = []
         while True:
             line = ollama_proc.stdout.readline()
@@ -47,7 +49,7 @@ def home():
 def ping():
     try:
         reply = ask_ollama("ping")
-        return jsonify({"status": "ok", "ollama_reply": reply})
+        return jsonify({"status": "ok", "ollama_reply": reply, "model_url": OLLAMA_URL})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
@@ -58,7 +60,7 @@ def chat():
 
     try:
         reply = ask_ollama(user_input)
-        return jsonify({"response": reply})
+        return jsonify({"response": reply, "model_url": OLLAMA_URL})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
