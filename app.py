@@ -24,7 +24,7 @@ def chat():
             timeout=60
         )
 
-        # Ollama returns JSON with "response"
+        # Parse Ollama JSON response
         data = response.json()
         reply = data.get("response", "")
 
