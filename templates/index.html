@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chat API Interface</title>
+    <title>🍉 Watermelon Chat Board</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Prism.js CSS for syntax highlighting -->
@@ -19,23 +19,43 @@
             text-align: center;
             padding: 20px;
             margin: 0;
-            background: #4a90e2;
+            background: #33cc33; /* watermelon rind green */
             color: white;
             font-weight: 600;
             letter-spacing: 1px;
         }
 
         #chat-box {
-            border: none;
+            border: 8px solid #006600; /* rind border */
             padding: 20px;
             width: 100%;
             max-width: 700px;
             height: 70vh;
             overflow-y: auto;
-            background: #fff;
             margin: 20px auto;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 30px;
+            background: radial-gradient(circle at top, #ff4d4d, #b30000); /* watermelon flesh */
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Decorative seeds */
+        #chat-box::before, #chat-box::after {
+            content: "● ● ● ● ●";
+            position: absolute;
+            font-size: 18px;
+            color: black;
+            opacity: 0.3;
+        }
+        #chat-box::before {
+            top: 10px;
+            left: 20px;
+        }
+        #chat-box::after {
+            bottom: 10px;
+            right: 20px;
         }
 
         #input-box {
@@ -60,7 +80,7 @@
         }
 
         #message:focus {
-            border-color: #4a90e2;
+            border-color: #33cc33;
         }
 
         button {
@@ -78,28 +98,34 @@
             background: #e85b50;
         }
 
-        .user {
-            background: #4a90e2;
-            color: #fff;
+        /* Fade-in animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user, .ai {
             padding: 10px 14px;
-            border-radius: 20px 20px 5px 20px;
             margin: 8px 0;
             display: inline-block;
             max-width: 70%;
-            align-self: flex-end;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .user {
+            background: #4a90e2;
+            color: #fff;
+            border-radius: 20px 20px 5px 20px;
+            align-self: flex-end;
         }
 
         .ai {
             background: #e1e8ed;
             color: #333;
-            padding: 10px 14px;
             border-radius: 20px 20px 20px 5px;
-            margin: 8px 0;
-            display: inline-block;
-            max-width: 70%;
+            align-self: flex-start;
             word-wrap: break-word;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
         .error {
@@ -147,7 +173,7 @@
     </style>
 </head>
 <body>
-    <h1>💬 Chat API Interface</h1>
+    <h1>🍉 Watermelon Chat Board</h1>
     <div id="chat-box"></div>
     <div id="input-box">
         <input type="text" id="message" placeholder="Type your message..." />
