@@ -5,7 +5,6 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Environment variables
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434").strip()
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral:latest").strip()
 
@@ -43,15 +42,6 @@ def chat():
 
     except Exception as e:
         return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
-
-
-@app.route("/ping")
-def ping():
-    try:
-        r = requests.get(f"{OLLAMA_URL}/api/tags", timeout=10)
-        return jsonify({"status": "ok", "ollama_status": r.status_code})
-    except Exception as e:
-        return jsonify({"status": "error", "detail": str(e)})
 
 
 if __name__ == "__main__":
