@@ -8,6 +8,8 @@
     #chatBox { border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: auto; }
     .user { color: blue; margin: 5px 0; }
     .bot { color: green; margin: 5px 0; }
+    pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    code { font-family: monospace; }
     #inputBox { width: 80%; padding: 8px; }
     #sendBtn { padding: 8px; }
   </style>
@@ -38,17 +40,27 @@
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let botReply = "";
+      let inCodeBlock = false;
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         botReply += decoder.decode(value, { stream: true });
-        // Update live as tokens arrive
-        const existingBot = document.querySelector("#chatBox .bot:last-child");
-        if (existingBot) {
-          existingBot.innerHTML = `<b>Bot:</b> ${botReply}`;
-        } else {
-          chatBox.innerHTML += `<p class="bot"><b>Bot:</b> ${botReply}</p>`;
+
+        // Split by code fences
+        const parts = botReply.split("```");
+        chatBox.innerHTML = ""; // reset and rebuild
+
+        for (let i = 0; i < parts.length; i++) {
+          if (i % 2 === 0) {
+            // Normal text
+            if (parts[i].trim()) {
+              chatBox.innerHTML += `<p class="bot"><b>Bot:</b> ${parts[i]}</p>`;
+            }
+          } else {
+            // Code block
+            chatBox.innerHTML += `<pre><code>${parts[i]}</code></pre>`;
+          }
         }
         chatBox.scrollTop = chatBox.scrollHeight;
       }
