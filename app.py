@@ -1,7 +1,7 @@
 import os
 import requests
 import json
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, Response
 
 app = Flask(__name__)
 
@@ -18,29 +18,30 @@ print(">>> TIMEOUT =", os.getenv("TIMEOUT"))
 def index():
     return render_template("index.html")
 
-# Chat route
+# Chat route with streaming
 @app.route("/chat", methods=["POST"])
 def chat():
     user_input = request.json.get("message", "")
-    try:
-        # Non-streaming request for simplicity
-        response = requests.post(
-            f"{OLLAMA_URL}/api/generate",
-            json={"model": "mistral", "prompt": user_input},
-            timeout=120
-        )
 
-        reply = ""
-        for line in response.text.splitlines():
-            try:
-                obj = json.loads(line)
-                reply += obj.get("response", "")
-            except Exception:
-                pass
+    def generate():
+        try:
+            with requests.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={"model": "mistral", "prompt": user_input},
+                stream=True,
+                timeout=120
+            ) as r:
+                for line in r.iter_lines():
+                    if line:
+                        try:
+                            obj = json.loads(line.decode("utf-8"))
+                            yield obj.get("response", "")
+                        except Exception:
+                            pass
+        except Exception as e:
+            yield f"Error contacting Ollama: {str(e)}"
 
-        return jsonify({"reply": reply.strip() or "(no response)"})
-    except Exception as e:
-        return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
+    return Response(generate(), mimetype="text/plain")
 
 # Health-check route
 @app.route("/ping")
