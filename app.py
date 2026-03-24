@@ -3,54 +3,45 @@ import requests
 import json
 from flask import Flask, request, jsonify, render_template
 
-app = Flask(__name__, template_folder="templates")
+app = Flask(__name__)
 
-# Ollama backend settings
+# Read environment variable safely
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434").strip()
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral").strip()
 
+# Sanity check: print values to logs
 print(">>> OLLAMA_URL =", OLLAMA_URL)
-print(">>> OLLAMA_MODEL =", OLLAMA_MODEL)
+print(">>> WEB_CONCURRENCY =", os.getenv("WEB_CONCURRENCY"))
+print(">>> TIMEOUT =", os.getenv("TIMEOUT"))
 
-# Serve the frontend
+# Serve index.html from templates folder
 @app.route("/")
 def index():
     return render_template("index.html")
 
-# Chat endpoint
+# Chat route
 @app.route("/chat", methods=["POST"])
 def chat():
     user_input = request.json.get("message", "")
-    if not user_input:
-        return jsonify({"reply": "(no input)"})
-
     try:
         response = requests.post(
             f"{OLLAMA_URL}/api/generate",
-            json={"model": OLLAMA_MODEL, "prompt": user_input},
-            stream=True,
-            timeout=120
+            json={"model": "mistral", "prompt": user_input},
+            timeout=60
         )
 
         reply = ""
-        for line in response.iter_lines():
-            if not line:
-                continue
+        for line in response.text.splitlines():
             try:
-                obj = json.loads(line.decode("utf-8"))
+                obj = json.loads(line)
                 reply += obj.get("response", "")
             except Exception:
-                continue
+                pass
 
-        if not reply.strip():
-            return jsonify({"reply": "(no response from Ollama)"})
-
-        return jsonify({"reply": reply.strip()})
-
+        return jsonify({"reply": reply.strip() or "(no response)"})
     except Exception as e:
         return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
 
-# Health check
+# Health-check route
 @app.route("/ping")
 def ping():
     try:
@@ -60,5 +51,5 @@ def ping():
         return jsonify({"status": "error", "detail": str(e)})
 
 if __name__ == "__main__":
-    # Run on port 8080 so ngrok can tunnel it
+    # Local dev server
     app.run(host="0.0.0.0", port=8080)
