@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, render_template
 app = Flask(__name__)
 
 # Ollama server + model
-OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434").strip()
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434").strip()
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral:latest").strip()
 
 print(">>> OLLAMA_URL =", OLLAMA_URL)
@@ -15,8 +15,7 @@ print(">>> OLLAMA_MODEL =", OLLAMA_MODEL)
 
 @app.route("/")
 def index():
-    # Make sure index.html is inside a 'templates' folder
-    return render_template("index.html")
+    return render_template("index.html")  # index.html must be inside templates/
 
 
 @app.route("/chat", methods=["POST"])
@@ -24,6 +23,8 @@ def chat():
     user_input = request.json.get("message", "").strip()
     if not user_input:
         return jsonify({"reply": "(no input)"})
+
+    print(f"[Flask] Received message: {user_input}")
 
     try:
         response = requests.post(
@@ -34,22 +35,29 @@ def chat():
         )
 
         reply_parts = []
-        for line in response.iter_lines():
+        for line in response.iter_lines(decode_unicode=True):
             if not line:
                 continue
             try:
-                obj = json.loads(line.decode("utf-8"))
-                reply_parts.append(obj.get("response", ""))
-            except Exception:
+                obj = json.loads(line)
+                piece = obj.get("response", "")
+                if piece:
+                    reply_parts.append(piece)
+                    print(f"[Ollama] Chunk: {piece}")
+            except Exception as e:
+                print(f"[Flask] Parse error: {e}")
                 continue
 
         reply = "".join(reply_parts).strip()
         if not reply:
+            print("[Flask] No response from Ollama")
             return jsonify({"reply": "(no response from Ollama)"})
 
+        print(f"[Flask] Final reply: {reply}")
         return jsonify({"reply": reply})
 
     except Exception as e:
+        print(f"[Flask] Error contacting Ollama: {e}")
         return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
 
 
@@ -63,5 +71,4 @@ def ping():
 
 
 if __name__ == "__main__":
-    # Run Flask on all interfaces so ngrok can reach it
     app.run(host="0.0.0.0", port=8080)
