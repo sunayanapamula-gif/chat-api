@@ -1,15 +1,16 @@
 import os
 import requests
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static", template_folder="templates")
 
 OLLAMA_URL = "https://nonsuppressed-glottal-tonette.ngrok-free.dev"
 OLLAMA_MODEL = "mistral:latest"
 
+# Serve your chat board HTML at root
 @app.route("/")
 def home():
-    return "OK"
+    return render_template("index.html")   # index.html goes in /templates
 
 @app.route("/ping", methods=["GET"])
 def ping():
@@ -57,5 +58,5 @@ def chat():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))   # ✅ Railway expects this
+    port = int(os.environ.get("PORT", 5000))   # Railway expects this
     app.run(host="0.0.0.0", port=port)
