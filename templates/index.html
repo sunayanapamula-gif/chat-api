@@ -20,6 +20,15 @@
         .bot { color: #0066cc; margin: 4px 0; }
         .typing { font-style: italic; color: gray; margin: 4px 0; }
         .error { color: red; margin: 4px 0; }
+        pre {
+            background: #f0f0f0;
+            padding: 8px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: Consolas, monospace;
+        }
     </style>
 </head>
 <body>
@@ -61,22 +70,41 @@
                     chatBox.removeChild(typingIndicator);
                 }
 
-                // Typewriter effect for bot reply
-                const botLine = document.createElement("p");
+                // Detect code blocks
+                let reply = data.reply;
+                const botLine = document.createElement("div");
                 botLine.className = "bot";
-                botLine.innerHTML = "<b>Bot:</b> ";
-                chatBox.appendChild(botLine);
 
-                let i = 0;
-                function typeWriter() {
-                    if (i < data.reply.length) {
-                        botLine.innerHTML += data.reply.charAt(i);
-                        i++;
-                        setTimeout(typeWriter, 30);
-                        chatBox.scrollTop = chatBox.scrollHeight;
+                if (reply.includes("```")) {
+                    // Extract code block
+                    const parts = reply.split("```");
+                    let formatted = "<b>Bot:</b> ";
+                    for (let i = 0; i < parts.length; i++) {
+                        if (i % 2 === 0) {
+                            formatted += parts[i];
+                        } else {
+                            formatted += `<pre><code>${parts[i].trim()}</code></pre>`;
+                        }
                     }
+                    botLine.innerHTML = formatted;
+                    chatBox.appendChild(botLine);
+                } else {
+                    // Typewriter effect for normal text
+                    botLine.innerHTML = "<b>Bot:</b> ";
+                    chatBox.appendChild(botLine);
+
+                    let i = 0;
+                    function typeWriter() {
+                        if (i < reply.length) {
+                            botLine.innerHTML += reply.charAt(i);
+                            i++;
+                            setTimeout(typeWriter, 30);
+                            chatBox.scrollTop = chatBox.scrollHeight;
+                        }
+                    }
+                    typeWriter();
                 }
-                typeWriter();
+
             } catch (err) {
                 if (chatBox.contains(typingIndicator)) {
                     chatBox.removeChild(typingIndicator);
