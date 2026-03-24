@@ -3,18 +3,21 @@ import requests
 import json
 from flask import Flask, request, jsonify, render_template
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates")
 
+# Ollama backend settings
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434").strip()
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral").strip()
 
 print(">>> OLLAMA_URL =", OLLAMA_URL)
 print(">>> OLLAMA_MODEL =", OLLAMA_MODEL)
 
+# Serve the frontend
 @app.route("/")
 def index():
     return render_template("index.html")
 
+# Chat endpoint
 @app.route("/chat", methods=["POST"])
 def chat():
     user_input = request.json.get("message", "")
@@ -42,15 +45,12 @@ def chat():
         if not reply.strip():
             return jsonify({"reply": "(no response from Ollama)"})
 
-        # Wrap code blocks in triple backticks if Ollama generated code
-        if "```" in reply:
-            return jsonify({"reply": reply.strip()})
-        else:
-            return jsonify({"reply": reply.strip()})
+        return jsonify({"reply": reply.strip()})
 
     except Exception as e:
         return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
 
+# Health check
 @app.route("/ping")
 def ping():
     try:
@@ -60,4 +60,5 @@ def ping():
         return jsonify({"status": "error", "detail": str(e)})
 
 if __name__ == "__main__":
+    # Run on port 8080 so ngrok can tunnel it
     app.run(host="0.0.0.0", port=8080)
