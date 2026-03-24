@@ -1,7 +1,7 @@
 import os
 import requests
 import json
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
@@ -13,18 +13,11 @@ print(">>> OLLAMA_URL =", OLLAMA_URL)
 print(">>> OLLAMA_MODEL =", OLLAMA_MODEL)
 
 
-@app.route("/")
-def index():
-    return render_template("index.html")  # index.html must be inside templates/
-
-
 @app.route("/chat", methods=["POST"])
 def chat():
     user_input = request.json.get("message", "").strip()
     if not user_input:
         return jsonify({"reply": "(no input)"})
-
-    print(f"[Flask] Received message: {user_input}")
 
     try:
         response = requests.post(
@@ -43,21 +36,16 @@ def chat():
                 piece = obj.get("response", "")
                 if piece:
                     reply_parts.append(piece)
-                    print(f"[Ollama] Chunk: {piece}")
-            except Exception as e:
-                print(f"[Flask] Parse error: {e}")
+            except Exception:
                 continue
 
         reply = "".join(reply_parts).strip()
         if not reply:
-            print("[Flask] No response from Ollama")
             return jsonify({"reply": "(no response from Ollama)"})
 
-        print(f"[Flask] Final reply: {reply}")
         return jsonify({"reply": reply})
 
     except Exception as e:
-        print(f"[Flask] Error contacting Ollama: {e}")
         return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
 
 
