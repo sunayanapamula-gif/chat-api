@@ -9,11 +9,9 @@ CORS(app)
 
 # Configuration
 OLLAMA_MODEL = "mistral:latest"
-# If you’re exposing Ollama via ngrok, put your forwarding URL here
-# Example: "https://nonsuppressed-glottal-tonette.ngrok-free.dev"
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
 
-# Start Ollama process once (using run mode, not serve)
+# Start Ollama process once (interactive run mode)
 ollama_proc = subprocess.Popen(
     ["ollama", "run", OLLAMA_MODEL],
     stdin=subprocess.PIPE,
