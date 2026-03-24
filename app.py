@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
-# Environment variables
+# Environment variables (set in Railway dashboard)
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434").strip()
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral:latest").strip()
 
@@ -27,19 +27,21 @@ def chat():
             f"{OLLAMA_URL}/api/generate",
             json={"model": OLLAMA_MODEL, "prompt": user_input},
             stream=True,
-            timeout=120
+            timeout=300   # longer timeout for Railway/ngrok
         )
 
         reply_parts = []
         for line in response.iter_lines(decode_unicode=True):
             if not line:
                 continue
+            print("Ollama raw line:", line)   # Debug log for Railway
             try:
                 obj = json.loads(line)
                 piece = obj.get("response", "")
                 if piece:
                     reply_parts.append(piece)
-            except Exception:
+            except Exception as e:
+                print("Parse error:", e)
                 continue
 
         reply = "".join(reply_parts).strip()
