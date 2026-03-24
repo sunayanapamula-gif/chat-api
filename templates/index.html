@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Chat API Interface</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* (your CSS unchanged) */
+        /* Your CSS styles here (unchanged) */
     </style>
 </head>
 <body>
@@ -13,7 +13,7 @@
     <div id="chat-box"></div>
     <div id="input-box">
         <input type="text" id="message" placeholder="Type your message..." />
-        <button onclick="sendMessage()">Send</button>
+        <button id="sendButton">Send</button>
     </div>
 
     <script>
@@ -24,6 +24,7 @@
 
             const chatBox = document.getElementById("chat-box");
 
+            // Show user message
             const userBubble = document.createElement("div");
             userBubble.className = "user";
             userBubble.innerHTML = `<b>You:</b> ${msg}`;
@@ -32,6 +33,7 @@
 
             msgInput.value = "";
 
+            // Show typing indicator
             const typingIndicator = document.createElement("p");
             typingIndicator.className = "typing";
             typingIndicator.innerHTML = "Please wait — generating reply <span></span><span></span><span></span>";
@@ -39,6 +41,7 @@
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
+                // Always call Flask /chat route
                 const res = await fetch(window.location.origin + "/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -54,6 +57,7 @@
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
 
+                // Handle code blocks
                 if (reply.includes("```")) {
                     const parts = reply.split("```");
                     let formatted = "<b>AI:</b> ";
@@ -75,6 +79,7 @@
                     chatBox.appendChild(aiBubble);
                     Prism.highlightAllUnder(aiBubble);
                 } else {
+                    // Typewriter effect
                     aiBubble.innerHTML = "<b>AI:</b> ";
                     chatBox.appendChild(aiBubble);
 
@@ -101,11 +106,14 @@
             }
         }
 
-        // Fix: correct Enter key handler
+        // Bind Send button
+        document.getElementById("sendButton").addEventListener("click", sendMessage);
+
+        // Bind Enter key
         document.getElementById("message").addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
-                sendMessage();  // corrected
+                sendMessage();
             }
         });
     </script>
