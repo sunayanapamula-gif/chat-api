@@ -10,8 +10,20 @@
     #chatBox { border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: auto; }
     .user { color: blue; margin: 5px 0; }
     .bot { color: green; margin: 5px 0; }
-    pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; position: relative; }
     code { font-family: monospace; }
+    .copy-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      background: #007acc;
+      color: white;
+      border: none;
+      border-radius: 3px;
+    }
     #inputBox { width: 80%; padding: 8px; }
     #sendBtn { padding: 8px; }
   </style>
@@ -79,12 +91,25 @@
               }
             }
 
-            chatBox.innerHTML += `<pre><code class="${lang}">${codeContent}</code></pre>`;
+            const codeId = "code-" + i;
+            chatBox.innerHTML += `
+              <pre>
+                <button class="copy-btn" onclick="copyCode('${codeId}')">Copy</button>
+                <code id="${codeId}" class="${lang}">${codeContent}</code>
+              </pre>`;
           }
         }
         chatBox.scrollTop = chatBox.scrollHeight;
         Prism.highlightAll(); // re-run highlighting after update
       }
+    }
+
+    function copyCode(id) {
+      const codeElement = document.getElementById(id);
+      const text = codeElement.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Code copied to clipboard!");
+      });
     }
 
     sendBtn.addEventListener("click", sendMessage);
