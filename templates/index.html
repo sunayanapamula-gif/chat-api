@@ -1,75 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Chat Board</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    #chatBox { border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: auto; }
-    .user { color: blue; margin: 5px 0; }
-    .bot { color: green; margin: 5px 0; }
-    pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; }
-    code { font-family: monospace; }
-    #inputBox { width: 80%; padding: 8px; }
-    #sendBtn { padding: 8px; }
-  </style>
-</head>
-<body>
-  <h2>Chat Board</h2>
-  <div id="chatBox"></div>
-  <input id="inputBox" type="text" placeholder="Type your message...">
-  <button id="sendBtn">Send</button>
+import os
+import requests
+import json
+from flask import Flask, request, jsonify, render_template, Response
 
-  <script>
-    const chatBox = document.getElementById("chatBox");
-    const inputBox = document.getElementById("inputBox");
-    const sendBtn = document.getElementById("sendBtn");
+app = Flask(__name__)
 
-    async function sendMessage() {
-      const msg = inputBox.value.trim();
-      if (!msg) return;
-      chatBox.innerHTML += `<p class="user"><b>You:</b> ${msg}</p>`;
-      inputBox.value = "";
+# Read environment variable safely
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434").strip()
 
-      const res = await fetch("/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg })
-      });
+# Sanity check: print values to logs
+print(">>> OLLAMA_URL =", OLLAMA_URL)
+print(">>> WEB_CONCURRENCY =", os.getenv("WEB_CONCURRENCY"))
+print(">>> TIMEOUT =", os.getenv("TIMEOUT"))
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let botReply = "";
-      let inCodeBlock = false;
+# Serve index.html from templates folder
+@app.route("/")
+def index():
+    return render_template("index.html")
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        botReply += decoder.decode(value, { stream: true });
+# Chat route with streaming
+@app.route("/chat", methods=["POST"])
+def chat():
+    user_input = request.json.get("message", "")
 
-        // Split by code fences
-        const parts = botReply.split("```");
-        chatBox.innerHTML = ""; // reset and rebuild
+    def generate():
+        try:
+            with requests.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={"model": "mistral", "prompt": user_input},
+                stream=True,
+                timeout=120
+            ) as r:
+                for line in r.iter_lines():
+                    if line:
+                        try:
+                            obj = json.loads(line.decode("utf-8"))
+                            # Stream raw response text
+                            yield obj.get("response", "")
+                        except Exception:
+                            pass
+        except Exception as e:
+            yield f"Error contacting Ollama: {str(e)}"
 
-        for (let i = 0; i < parts.length; i++) {
-          if (i % 2 === 0) {
-            // Normal text
-            if (parts[i].trim()) {
-              chatBox.innerHTML += `<p class="bot"><b>Bot:</b> ${parts[i]}</p>`;
-            }
-          } else {
-            // Code block
-            chatBox.innerHTML += `<pre><code>${parts[i]}</code></pre>`;
-          }
-        }
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }
-    }
+    # Stream plain text back to the client
+    return Response(generate(), mimetype="text/plain")
 
-    sendBtn.addEventListener("click", sendMessage);
-    inputBox.addEventListener("keypress", e => {
-      if (e.key === "Enter") sendMessage();
-    });
-  </script>
-</body>
-</html>
+# Health-check route
+@app.route("/ping")
+def ping():
+    try:
+        r = requests.get(f"{OLLAMA_URL}/api/tags", timeout=10)
+        return jsonify({"status": "ok", "ollama_status": r.status_code})
+    except Exception as e:
+        return jsonify({"status": "error", "detail": str(e)})
+
+if __name__ == "__main__":
+    # Local dev server
+    app.run(host="0.0.0.0", port=8080)
