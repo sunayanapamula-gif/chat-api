@@ -23,10 +23,11 @@ def index():
 def chat():
     user_input = request.json.get("message", "")
     try:
+        # Non-streaming request for simplicity
         response = requests.post(
             f"{OLLAMA_URL}/api/generate",
             json={"model": "mistral", "prompt": user_input},
-            timeout=60
+            timeout=120
         )
 
         reply = ""
