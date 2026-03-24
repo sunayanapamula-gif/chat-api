@@ -1,128 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
   <title>Chat Board</title>
-  <!-- Prism.js CSS for syntax highlighting -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    #chatBox { border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: auto; }
-    .user { color: blue; margin: 5px 0; }
-    .ai { color: green; margin: 5px 0; }
-    pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; position: relative; }
-    code { font-family: monospace; }
-    .copy-btn {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      padding: 4px 8px;
-      font-size: 12px;
-      cursor: pointer;
-      background: #007acc;
-      color: white;
-      border: none;
-      border-radius: 3px;
-    }
-    #inputBox { width: 80%; padding: 8px; }
-    #sendBtn { padding: 8px; }
-    #typingIndicator { font-style: italic; color: gray; margin: 5px 0; }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; }
+    #chatBox { width: 600px; margin: 20px auto; padding: 10px; background: white; border: 1px solid #ccc; }
+    .user { color: blue; }
+    .ai { color: green; }
   </style>
 </head>
 <body>
-  <h2>Chat Board</h2>
   <div id="chatBox"></div>
-  <p id="typingIndicator" style="display:none;">AI is typing…</p>
-  <input id="inputBox" type="text" placeholder="Type your message...">
-  <button id="sendBtn">Send</button>
-
-  <!-- Prism.js JS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+  <input id="userInput" type="text" placeholder="Type a message..." />
+  <button onclick="sendMessage()">Send</button>
 
   <script>
-    const chatBox = document.getElementById("chatBox");
-    const inputBox = document.getElementById("inputBox");
-    const sendBtn = document.getElementById("sendBtn");
-    const typingIndicator = document.getElementById("typingIndicator");
-
     async function sendMessage() {
-      const msg = inputBox.value.trim();
-      if (!msg) return;
-      chatBox.innerHTML += `<p class="user"><b>You:</b> ${msg}</p>`;
-      inputBox.value = "";
+      const input = document.getElementById("userInput").value;
+      const chatBox = document.getElementById("chatBox");
 
-      typingIndicator.style.display = "block"; // show typing indicator
+      chatBox.innerHTML += `<div class="user">You: ${input}</div>`;
 
-      const res = await fetch("/chat", {
+      const response = await fetch("/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg })
+        body: JSON.stringify({ message: input })
       });
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let aiReply = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        aiReply += decoder.decode(value, { stream: true });
-
-        // Split by code fences
-        const parts = aiReply.split("```");
-        chatBox.innerHTML = ""; // reset and rebuild
-
-        for (let i = 0; i < parts.length; i++) {
-          if (i % 2 === 0) {
-            // Normal text
-            if (parts[i].trim()) {
-              chatBox.innerHTML += `<p class="ai"><b>AI:</b> ${parts[i]}</p>`;
-            }
-          } else {
-            // Code block with optional language tag
-            const firstLineBreak = parts[i].indexOf("\n");
-            let lang = "language-python"; // default
-            let codeContent = parts[i];
-
-            if (firstLineBreak !== -1) {
-              const maybeLang = parts[i].substring(0, firstLineBreak).trim();
-              if (maybeLang) {
-                lang = "language-" + maybeLang.toLowerCase();
-                codeContent = parts[i].substring(firstLineBreak + 1);
-              }
-            }
-
-            const codeId = "code-" + i;
-            chatBox.innerHTML += `
-              <pre>
-                <button class="copy-btn" onclick="copyCode('${codeId}')">Copy</button>
-                <code id="${codeId}" class="${lang}">${codeContent}</code>
-              </pre>`;
-          }
-        }
-        chatBox.scrollTop = chatBox.scrollHeight;
-        Prism.highlightAll(); // re-run highlighting after update
-      }
-
-      typingIndicator.style.display = "none"; // hide typing indicator
+      const data = await response.json();
+      chatBox.innerHTML += `<div class="ai">AI: ${data.reply}</div>`;
     }
-
-    function copyCode(id) {
-      const codeElement = document.getElementById(id);
-      const text = codeElement.innerText;
-      navigator.clipboard.writeText(text).then(() => {
-        alert("Code copied to clipboard!");
-      });
-    }
-
-    sendBtn.addEventListener("click", sendMessage);
-    inputBox.addEventListener("keypress", e => {
-      if (e.key === "Enter") sendMessage();
-    });
   </script>
 </body>
 </html>
