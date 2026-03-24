@@ -1,8 +1,11 @@
 import os
 import requests
+import simplejson as json
 from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
+CORS(app)  # allow cross-origin requests from your frontend
 
 # Update this each time you restart ngrok
 OLLAMA_URL = "https://nonsuppressed-glottal-tonette.ngrok-free.dev"
@@ -26,7 +29,7 @@ def ping():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    data = request.get_json()
+    data = request.get_json(force=True)
     user_input = data.get("message", "")
 
     payload = {
@@ -54,7 +57,7 @@ def chat():
             if line:
                 decoded = line.decode("utf-8")
                 try:
-                    obj = requests.utils.json.loads(decoded)
+                    obj = json.loads(decoded)
                     if "response" in obj:
                         reply += obj["response"]
                 except Exception:
