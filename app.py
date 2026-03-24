@@ -1,12 +1,23 @@
 import os
 import requests
 import json
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
-OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434").strip()
+# Environment variables
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434").strip()
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral:latest").strip()
+
+print(">>> OLLAMA_URL =", OLLAMA_URL)
+print(">>> OLLAMA_MODEL =", OLLAMA_MODEL)
+
+
+@app.route("/")
+def index():
+    # Serve the chat interface
+    return render_template("index.html")
+
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -42,6 +53,15 @@ def chat():
 
     except Exception as e:
         return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
+
+
+@app.route("/ping")
+def ping():
+    try:
+        r = requests.get(f"{OLLAMA_URL}/api/tags", timeout=10)
+        return jsonify({"status": "ok", "ollama_status": r.status_code})
+    except Exception as e:
+        return jsonify({"status": "error", "detail": str(e)})
 
 
 if __name__ == "__main__":
