@@ -1,5 +1,4 @@
 import os
-import json
 import requests
 from flask import Flask, request, jsonify, render_template
 
@@ -35,24 +34,29 @@ def chat():
     }
 
     try:
-        # Non-streaming request: simpler, returns full JSON
+        # Streaming request: collect all "response" parts
         r = requests.post(
             f"{OLLAMA_URL}/api/generate",
             json=payload,
             headers={
                 "Content-Type": "application/json",
                 "ngrok-skip-browser-warning": "true"
-            }
+            },
+            stream=True
         )
 
         if r.status_code != 200:
             return jsonify({"error": f"Ollama returned {r.status_code}"}), r.status_code
 
-        resp_json = r.json()
-        # Ollama returns {"response": "...", "done": true, ...}
-        reply = resp_json.get("response", "").strip()
+        reply = ""
+        for line in r.iter_lines():
+            if line:
+                decoded = line.decode("utf-8")
+                if '"response":"' in decoded:
+                    part = decoded.split('"response":"')[1].split('"')[0]
+                    reply += part
 
-        return jsonify({"response": reply})
+        return jsonify({"response": reply.strip()})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
