@@ -12,13 +12,16 @@ OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral:latest").strip()
 print(">>> OLLAMA_URL =", OLLAMA_URL)
 print(">>> OLLAMA_MODEL =", OLLAMA_MODEL)
 
+
 @app.route("/")
 def index():
+    # Make sure index.html is inside a 'templates' folder
     return render_template("index.html")
+
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_input = request.json.get("message", "")
+    user_input = request.json.get("message", "").strip()
     if not user_input:
         return jsonify({"reply": "(no input)"})
 
@@ -30,20 +33,21 @@ def chat():
             timeout=120
         )
 
-        reply = ""
+        reply_parts = []
         for line in response.iter_lines():
             if not line:
                 continue
             try:
                 obj = json.loads(line.decode("utf-8"))
-                reply += obj.get("response", "")
+                reply_parts.append(obj.get("response", ""))
             except Exception:
                 continue
 
-        if not reply.strip():
+        reply = "".join(reply_parts).strip()
+        if not reply:
             return jsonify({"reply": "(no response from Ollama)"})
 
-        return jsonify({"reply": reply.strip()})
+        return jsonify({"reply": reply})
 
     except Exception as e:
         return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
@@ -59,4 +63,5 @@ def ping():
 
 
 if __name__ == "__main__":
+    # Run Flask on all interfaces so ngrok can reach it
     app.run(host="0.0.0.0", port=8080)
