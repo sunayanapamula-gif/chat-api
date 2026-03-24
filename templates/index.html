@@ -136,9 +136,11 @@
                 });
                 const data = await res.json();
 
-                chatBox.removeChild(typingIndicator);
+                if (chatBox.contains(typingIndicator)) {
+                    chatBox.removeChild(typingIndicator);
+                }
 
-                let reply = data.reply || data.response || "";
+                let reply = data.response || "";  // backend returns {"response": "..."}
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
 
@@ -171,7 +173,9 @@
                 chatBox.scrollTop = chatBox.scrollHeight;
 
             } catch (err) {
-                chatBox.removeChild(typingIndicator);
+                if (chatBox.contains(typingIndicator)) {
+                    chatBox.removeChild(typingIndicator);
+                }
                 chatBox.innerHTML += `<p class="error"><b>Error:</b> ${err.message}</p>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
