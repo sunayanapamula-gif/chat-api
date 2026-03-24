@@ -2,7 +2,6 @@
 <html>
 <head>
     <title>Chat API Interface</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { font-family: Arial, sans-serif; margin: 10px; background: #f5f5f5; }
@@ -12,10 +11,7 @@
         button { padding: 8px 14px; font-size: 1em; }
         .user { background: #ff4d4d; color: #fff; padding: 8px 12px; border-radius: 20px 20px 5px 20px; margin: 6px 0; display: inline-block; }
         .ai { background: #0066cc; color: #fff; padding: 8px 12px; border-radius: 20px 20px 20px 5px; margin: 6px 0; display: inline-block; }
-        .typing { font-style: italic; color: gray; margin: 4px 0; }
         .error { color: red; margin: 4px 0; }
-        pre { background: #f0f0f0; padding: 8px; border-radius: 4px; overflow-x: auto; }
-        code { font-family: Consolas, monospace; }
     </style>
 </head>
 <body>
@@ -43,23 +39,19 @@
             msgInput.value = "";
 
             const typingIndicator = document.createElement("p");
-            typingIndicator.className = "typing";
             typingIndicator.innerHTML = "Please wait — generating reply...";
             chatBox.appendChild(typingIndicator);
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                // Call your Railway app directly
-                const res = await fetch("https://chat-api-production-ebc8.up.railway.app/chat", {
+                const res = await fetch("/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ message: msg })
                 });
                 const data = await res.json();
 
-                if (chatBox.contains(typingIndicator)) {
-                    chatBox.removeChild(typingIndicator);
-                }
+                chatBox.removeChild(typingIndicator);
 
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
@@ -68,9 +60,7 @@
                 chatBox.scrollTop = chatBox.scrollHeight;
 
             } catch (err) {
-                if (chatBox.contains(typingIndicator)) {
-                    chatBox.removeChild(typingIndicator);
-                }
+                chatBox.removeChild(typingIndicator);
                 chatBox.innerHTML += `<p class="error"><b>Error:</b> ${err.message}</p>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
@@ -83,9 +73,5 @@
             }
         });
     </script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
 </body>
 </html>
