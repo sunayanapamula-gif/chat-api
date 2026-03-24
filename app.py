@@ -8,7 +8,7 @@ OLLAMA_URL = "https://impressive-echo-limitation-cities.trycloudflare.com"
 
 @app.route("/")
 def home():
-    # Render the frontend interface from templates/index.html
+    # Serve the frontend interface from templates/index.html
     return render_template("index.html")
 
 @app.route("/chat", methods=["POST"])
