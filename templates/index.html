@@ -28,7 +28,15 @@
       });
 
       const data = await response.json();
-      chatBox.innerHTML += `<div class="ai">AI: ${data.reply}</div>`;
+
+      // ✅ Show AI reply or error
+      if (data.reply) {
+        chatBox.innerHTML += `<div class="ai">AI: ${data.reply}</div>`;
+      } else if (data.error) {
+        chatBox.innerHTML += `<div class="ai">Error: ${data.error}</div>`;
+      } else {
+        chatBox.innerHTML += `<div class="ai">AI: (no reply)</div>`;
+      }
     }
   </script>
 </body>
