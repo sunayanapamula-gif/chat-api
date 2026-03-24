@@ -1,17 +1,16 @@
 import os
 import requests
-import simplejson as json
+import json
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 CORS(app)  # allow cross-origin requests from your frontend
 
-# Update this each time you restart ngrok
+# IMPORTANT: update this each time you restart ngrok
 OLLAMA_URL = "https://nonsuppressed-glottal-tonette.ngrok-free.dev"
 OLLAMA_MODEL = "mistral:latest"
 
-# Serve your chat board HTML at root
 @app.route("/")
 def home():
     return render_template("index.html")   # index.html goes in /templates
@@ -38,7 +37,6 @@ def chat():
     }
 
     try:
-        # Streaming request: Ollama sends JSON lines
         r = requests.post(
             f"{OLLAMA_URL}/api/generate",
             json=payload,
@@ -46,7 +44,7 @@ def chat():
                 "Content-Type": "application/json",
                 "ngrok-skip-browser-warning": "true"
             },
-            stream=True   # important for streaming
+            stream=True
         )
 
         if r.status_code != 200:
@@ -61,7 +59,6 @@ def chat():
                     if "response" in obj:
                         reply += obj["response"]
                 except Exception:
-                    # ignore malformed lines
                     continue
 
         return jsonify({"response": reply.strip()})
