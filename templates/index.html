@@ -49,4 +49,80 @@
     const sendBtn = document.getElementById("sendBtn");
     const typingIndicator = document.getElementById("typingIndicator");
 
-    async function—
+    async function sendMessage() {
+      const msg = inputBox.value.trim();
+      if (!msg) return;
+      chatBox.innerHTML += `<p class="user"><b>You:</b> ${msg}</p>`;
+      inputBox.value = "";
+
+      typingIndicator.style.display = "block"; // show typing indicator
+
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg })
+      });
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let aiReply = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        aiReply += decoder.decode(value, { stream: true });
+
+        // Split by code fences
+        const parts = aiReply.split("```");
+        chatBox.innerHTML = ""; // reset and rebuild
+
+        for (let i = 0; i < parts.length; i++) {
+          if (i % 2 === 0) {
+            // Normal text
+            if (parts[i].trim()) {
+              chatBox.innerHTML += `<p class="ai"><b>AI:</b> ${parts[i]}</p>`;
+            }
+          } else {
+            // Code block with optional language tag
+            const firstLineBreak = parts[i].indexOf("\n");
+            let lang = "language-python"; // default
+            let codeContent = parts[i];
+
+            if (firstLineBreak !== -1) {
+              const maybeLang = parts[i].substring(0, firstLineBreak).trim();
+              if (maybeLang) {
+                lang = "language-" + maybeLang.toLowerCase();
+                codeContent = parts[i].substring(firstLineBreak + 1);
+              }
+            }
+
+            const codeId = "code-" + i;
+            chatBox.innerHTML += `
+              <pre>
+                <button class="copy-btn" onclick="copyCode('${codeId}')">Copy</button>
+                <code id="${codeId}" class="${lang}">${codeContent}</code>
+              </pre>`;
+          }
+        }
+        chatBox.scrollTop = chatBox.scrollHeight;
+        Prism.highlightAll(); // re-run highlighting after update
+      }
+
+      typingIndicator.style.display = "none"; // hide typing indicator
+    }
+
+    function copyCode(id) {
+      const codeElement = document.getElementById(id);
+      const text = codeElement.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Code copied to clipboard!");
+      });
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    inputBox.addEventListener("keypress", e => {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+</html>
