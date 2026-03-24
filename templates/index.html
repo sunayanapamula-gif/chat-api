@@ -2,6 +2,9 @@
 <html>
 <head>
     <title>Chat API Interface</title>
+    <!-- Prism.js CSS for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
         #chat-box {
@@ -70,7 +73,6 @@
                     chatBox.removeChild(typingIndicator);
                 }
 
-                // Detect code blocks
                 let reply = data.reply;
                 const botLine = document.createElement("div");
                 botLine.className = "bot";
@@ -83,11 +85,20 @@
                         if (i % 2 === 0) {
                             formatted += parts[i];
                         } else {
-                            formatted += `<pre><code>${parts[i].trim()}</code></pre>`;
+                            // Try to detect language (e.g., ```python)
+                            const langParts = parts[i].trim().split("\n");
+                            let lang = "language-python"; // default
+                            if (langParts[0].match(/^[a-zA-Z]+$/)) {
+                                lang = "language-" + langParts[0].toLowerCase();
+                                langParts.shift(); // remove language line
+                            }
+                            const codeContent = langParts.join("\n");
+                            formatted += `<pre><code class="${lang}">${codeContent.replace(/</g,"&lt;")}</code></pre>`;
                         }
                     }
                     botLine.innerHTML = formatted;
                     chatBox.appendChild(botLine);
+                    Prism.highlightAllUnder(botLine); // highlight code
                 } else {
                     // Typewriter effect for normal text
                     botLine.innerHTML = "<b>Bot:</b> ";
@@ -122,5 +133,10 @@
             }
         });
     </script>
+
+    <!-- Prism.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
 </body>
 </html>
