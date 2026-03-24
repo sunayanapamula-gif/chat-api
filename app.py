@@ -1,4 +1,5 @@
 import os
+import json
 import requests
 from flask import Flask, request, jsonify, render_template
 
@@ -49,11 +50,13 @@ def chat():
             if line:
                 try:
                     chunk = line.decode("utf-8")
-                    output += chunk
+                    json_data = json.loads(chunk)
+                    if "response" in json_data:
+                        output += json_data["response"]
                 except Exception:
                     pass
 
-        return jsonify({"response": output})
+        return jsonify({"response": output.strip()})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
