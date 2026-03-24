@@ -10,7 +10,7 @@ OLLAMA_MODEL = "mistral:latest"
 # Serve your chat board HTML at root
 @app.route("/")
 def home():
-    return render_template("demo.html")   # index.html goes in /templates
+    return render_template("index.html")   # index.html goes in /templates
 
 @app.route("/ping", methods=["GET"])
 def ping():
