@@ -19,7 +19,6 @@ ollama_proc = subprocess.Popen(
     bufsize=1
 )
 
-# Lock to prevent overlapping writes
 ollama_lock = threading.Lock()
 
 def ask_ollama(prompt: str) -> str:
@@ -34,9 +33,7 @@ def ask_ollama(prompt: str) -> str:
             line = ollama_proc.stdout.readline()
             if not line:
                 break
-            # Ollama prints responses line by line
             reply_lines.append(line.strip())
-            # Stop when Ollama signals end of response
             if line.strip() == "":
                 break
 
