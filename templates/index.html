@@ -5,7 +5,17 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* Your CSS styles here (unchanged) */
+        body { font-family: Arial, sans-serif; margin: 10px; background: #f5f5f5; }
+        #chat-box { border: 1px solid #ccc; padding: 10px; width: 100%; max-width: 600px; height: 60vh; overflow-y: auto; background: #fff; margin: 0 auto; }
+        #input-box { margin-top: 10px; display: flex; gap: 8px; max-width: 600px; margin: 10px auto; }
+        #message { flex: 1; padding: 8px; font-size: 1em; }
+        button { padding: 8px 14px; font-size: 1em; }
+        .user { background: #ff4d4d; color: #fff; padding: 8px 12px; border-radius: 20px 20px 5px 20px; margin: 6px 0; display: inline-block; }
+        .ai { background: #0066cc; color: #fff; padding: 8px 12px; border-radius: 20px 20px 20px 5px; margin: 6px 0; display: inline-block; }
+        .typing { font-style: italic; color: gray; margin: 4px 0; }
+        .error { color: red; margin: 4px 0; }
+        pre { background: #f0f0f0; padding: 8px; border-radius: 4px; overflow-x: auto; }
+        code { font-family: Consolas, monospace; }
     </style>
 </head>
 <body>
@@ -36,65 +46,43 @@
             // Show typing indicator
             const typingIndicator = document.createElement("p");
             typingIndicator.className = "typing";
-            typingIndicator.innerHTML = "Please wait — generating reply <span></span><span></span><span></span>";
+            typingIndicator.innerHTML = "Please wait — generating reply...";
             chatBox.appendChild(typingIndicator);
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                // Always call Flask /chat route
-                const res = await fetch(window.location.origin + "/chat", {
+                // Direct call to Ollama API
+                const res = await fetch("http://127.0.0.1:11434/api/generate", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: msg })
+                    body: JSON.stringify({ model: "mistral:latest", prompt: msg })
                 });
-                const data = await res.json();
+
+                const reader = res.body.getReader();
+                let reply = "";
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    const chunk = new TextDecoder().decode(value).trim();
+                    if (chunk) {
+                        try {
+                            const obj = JSON.parse(chunk);
+                            reply += obj.response || "";
+                        } catch (e) {
+                            // skip malformed chunks
+                        }
+                    }
+                }
 
                 if (chatBox.contains(typingIndicator)) {
                     chatBox.removeChild(typingIndicator);
                 }
 
-                let reply = data.reply || "(No reply received)";
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
-
-                // Handle code blocks
-                if (reply.includes("```")) {
-                    const parts = reply.split("```");
-                    let formatted = "<b>AI:</b> ";
-                    for (let i = 0; i < parts.length; i++) {
-                        if (i % 2 === 0) {
-                            formatted += parts[i];
-                        } else {
-                            const langParts = parts[i].trim().split("\n");
-                            let lang = "language-python";
-                            if (langParts[0].match(/^[a-zA-Z]+$/)) {
-                                lang = "language-" + langParts[0].toLowerCase();
-                                langParts.shift();
-                            }
-                            const codeContent = langParts.join("\n");
-                            formatted += `<pre><code class="${lang}">${codeContent.replace(/</g,"&lt;")}</code></pre>`;
-                        }
-                    }
-                    aiBubble.innerHTML = formatted;
-                    chatBox.appendChild(aiBubble);
-                    Prism.highlightAllUnder(aiBubble);
-                } else {
-                    // Typewriter effect
-                    aiBubble.innerHTML = "<b>AI:</b> ";
-                    chatBox.appendChild(aiBubble);
-
-                    let i = 0;
-                    function typeWriter() {
-                        if (i < reply.length) {
-                            aiBubble.innerHTML += reply.charAt(i);
-                            i++;
-                            setTimeout(typeWriter, 30);
-                            chatBox.scrollTop = chatBox.scrollHeight;
-                        }
-                    }
-                    typeWriter();
-                }
-
+                aiBubble.innerHTML = `<b>AI:</b> ${reply || "(no response)"}`;
+                chatBox.appendChild(aiBubble);
                 chatBox.scrollTop = chatBox.scrollHeight;
 
             } catch (err) {
