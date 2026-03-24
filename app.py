@@ -1,74 +1,58 @@
-import os
 import requests
-import json
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Environment variables (set in Railway dashboard)
-OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434").strip()
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral:latest").strip()
+# Directly use your ngrok tunnel URL
+OLLAMA_URL = "https://nonsuppressed-glottal-tonette.ngrok-free.dev"
+OLLAMA_MODEL = "mistral:latest"
 
-print(">>> OLLAMA_URL =", OLLAMA_URL)
-print(">>> OLLAMA_MODEL =", OLLAMA_MODEL)
-
-# Common headers for ngrok free tunnels
-NGROK_HEADERS = {"ngrok-skip-browser-warning": "true"}
-
-@app.route("/")
-def index():
-    return render_template("index.html")
-
-@app.route("/chat", methods=["POST"])
-def chat():
-    user_input = request.json.get("message", "").strip()
-    if not user_input:
-        return jsonify({"reply": "(no input)"})
-
-    try:
-        response = requests.post(
-            f"{OLLAMA_URL}/api/generate",
-            json={"model": OLLAMA_MODEL, "prompt": user_input},
-            headers=NGROK_HEADERS,   # ✅ critical fix
-            stream=True,
-            timeout=300
-        )
-
-        reply_parts = []
-        for line in response.iter_lines(decode_unicode=True):
-            if not line:
-                continue
-            print("Ollama raw line:", line)
-            try:
-                obj = json.loads(line)
-                if "response" in obj and obj["response"]:
-                    reply_parts.append(obj["response"])
-                if obj.get("done", False):
-                    break
-            except Exception as e:
-                print("Parse error:", e)
-                continue
-
-        reply = "".join(reply_parts).strip()
-        if not reply:
-            return jsonify({"reply": "(no response from Ollama)"})
-
-        return jsonify({"reply": reply})
-
-    except Exception as e:
-        return jsonify({"reply": f"Error contacting Ollama: {str(e)}"})
-
-@app.route("/ping")
+@app.route("/ping", methods=["GET"])
 def ping():
     try:
+        # Simple health check to Ollama
         r = requests.get(
             f"{OLLAMA_URL}/api/tags",
-            headers=NGROK_HEADERS,   # ✅ critical fix
-            timeout=10
+            headers={"ngrok-skip-browser-warning": "true"}
         )
         return jsonify({"status": "ok", "ollama_status": r.status_code})
     except Exception as e:
-        return jsonify({"status": "error", "detail": str(e)})
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.get_json()
+    user_input = data.get("message", "")
+
+    payload = {
+        "model": OLLAMA_MODEL,
+        "prompt": user_input
+    }
+
+    try:
+        r = requests.post(
+            f"{OLLAMA_URL}/api/generate",
+            json=payload,
+            headers={
+                "Content-Type": "application/json",
+                "ngrok-skip-browser-warning": "true"
+            },
+            stream=True
+        )
+
+        # Collect streamed response
+        output = ""
+        for line in r.iter_lines():
+            if line:
+                try:
+                    chunk = line.decode("utf-8")
+                    output += chunk
+                except Exception:
+                    pass
+
+        return jsonify({"response": output})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    app.run(host="0.0.0.0", port=5000)
