@@ -11,7 +11,7 @@
         }
         #chat-box { 
             border: 6px solid #ff8c00; 
-            border-radius: 50%; 
+            border-radius: 50%; /* perfect circle like an orange */
             background: radial-gradient(circle at center, #ffa500 60%, #ffcc80 100%);
             width: 420px; 
             height: 420px; 
@@ -20,6 +20,36 @@
             overflow-y: auto; 
             color: #333;
             position: relative;
+        }
+
+        /* Orange seeds (small dots inside) */
+        #chat-box::before {
+            content: "";
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 200px; height: 200px;
+            background-image: radial-gradient(#fff 2px, transparent 3px);
+            background-size: 40px 40px;
+            transform: translate(-50%, -50%);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        /* Orange segment lines */
+        #chat-box::after {
+            content: "";
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 100%; height: 100%;
+            background-image: repeating-conic-gradient(
+                from 0deg,
+                transparent 0deg 30deg,
+                rgba(255,255,255,0.3) 30deg 32deg
+            );
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            opacity: 0.4;
+            pointer-events: none;
         }
 
         /* Glossy highlight */
@@ -58,55 +88,38 @@
             margin: 6px 0; 
             text-align: left; 
         }
-
-        /* Code block styling */
-        pre {
-            background: #2d2d2d;
-            color: #f8f8f2;
-            padding: 10px;
-            border-radius: 8px;
-            overflow-x: auto;
-            font-size: 13px;
-            font-family: Consolas, monospace;
+        #input-box { 
+            margin-top: 10px; 
+            display: flex; 
+            gap: 8px; 
+            max-width: 420px; 
+            margin: 10px auto; 
         }
-        .keyword { color: #ff79c6; }
-        .string { color: #f1fa8c; }
-        .comment { color: #6272a4; font-style: italic; }
-        .function { color: #50fa7b; }
+        #message { 
+            flex: 1; 
+            padding: 8px; 
+            border-radius: 8px; 
+            border: 1px solid #ccc; 
+            font-size: 14px;
+        }
+        button { 
+            padding: 8px 14px; 
+            background: #ff8c00; 
+            color: #fff; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold;
+        }
+        button:hover { 
+            background: #e67e22; 
+        }
     </style>
 </head>
 <body>
     <h1 style="text-align:center;">🍊 Orange Chat Board</h1>
     <div id="chat-box">
         <div class="glossy"></div>
-        <!-- Example AI response with colored Python code -->
-        <div class="ai">
-            🍊 Sure! Here is a simple Python example:<br><br>
-            <pre>
-<span class="comment"># Initialize an empty list</span>
-<span class="keyword">my_list</span> = []
-
-<span class="comment"># Add some elements to the list</span>
-<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"apple"</span>)
-<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"banana"</span>)
-<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"cherry"</span>)
-
-<span class="comment"># Print the initial list</span>
-<span class="function">print</span>(<span class="string">"Initial List:"</span>, <span class="keyword">my_list</span>)
-
-<span class="comment"># Modify (update) an element</span>
-<span class="keyword">my_list</span>[1] = <span class="string">"blueberry"</span>
-
-<span class="comment"># Print the updated list</span>
-<span class="function">print</span>(<span class="string">"Updated List:"</span>, <span class="keyword">my_list</span>)
-
-<span class="comment"># Add a new element</span>
-<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"date"</span>)
-
-<span class="comment"># Print the final list</span>
-<span class="function">print</span>(<span class="string">"Final List:"</span>, <span class="keyword">my_list</span>)
-            </pre>
-        </div>
     </div>
     <div id="input-box">
         <input type="text" id="message" placeholder="Type your message..." />
@@ -116,6 +129,7 @@
     <script>
         const msgInput = document.getElementById("message");
 
+        // Allow Enter key to send message
         msgInput.addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
@@ -129,6 +143,7 @@
 
             const chatBox = document.getElementById("chat-box");
 
+            // User bubble with emoji
             const userBubble = document.createElement("div");
             userBubble.className = "user";
             userBubble.innerHTML = "🙂 " + msg;
@@ -136,6 +151,7 @@
 
             msgInput.value = "";
 
+            // Typing indicator with emoji
             const typingBubble = document.createElement("div");
             typingBubble.className = "typing";
             typingBubble.innerHTML = "🤖 AI is thinking...";
@@ -150,13 +166,16 @@
                 });
                 const data = await res.json();
 
+                // Remove typing indicator
                 chatBox.removeChild(typingBubble);
 
+                // AI bubble with emoji
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
                 aiBubble.innerHTML = "🍊 " + (data.response || "Error: No reply");
                 chatBox.appendChild(aiBubble);
 
+                // Auto-scroll
                 chatBox.scrollTop = chatBox.scrollHeight;
             } catch (err) {
                 chatBox.removeChild(typingBubble);
