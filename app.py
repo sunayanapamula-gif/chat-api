@@ -7,7 +7,7 @@ from flask_cors import CORS
 app = Flask(__name__, static_folder="static", template_folder="templates")
 CORS(app)
 
-# Ollama URL points to your ngrok tunnel (Railway variable overrides if set)
+# Use your ngrok tunnel by default
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "https://nonsuppressed-glottal-tonette.ngrok-free.dev")
 OLLAMA_MODEL = "mistral:latest"
 
@@ -21,7 +21,8 @@ def ping():
         res = requests.post(
             f"{OLLAMA_URL}/api/generate",
             json={"model": OLLAMA_MODEL, "prompt": "ping"},
-            stream=True
+            stream=True,
+            timeout=60
         )
         reply_text = ""
         for line in res.iter_lines():
@@ -30,8 +31,10 @@ def ping():
                     j = json.loads(line.decode("utf-8"))
                     if "response" in j:
                         reply_text += j["response"]
-                except:
+                except Exception:
                     pass
+        if not reply_text.strip():
+            reply_text = "(no reply from Ollama)"
         return jsonify({"status": "ok", "ollama_reply": reply_text.strip(), "model_url": OLLAMA_URL})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -45,9 +48,9 @@ def chat():
         res = requests.post(
             f"{OLLAMA_URL}/api/generate",
             json={"model": OLLAMA_MODEL, "prompt": user_input},
-            stream=True
+            stream=True,
+            timeout=120
         )
-
         reply_text = ""
         for line in res.iter_lines():
             if line:
@@ -55,9 +58,10 @@ def chat():
                     j = json.loads(line.decode("utf-8"))
                     if "response" in j:
                         reply_text += j["response"]
-                except:
+                except Exception:
                     pass
-
+        if not reply_text.strip():
+            reply_text = "(no reply from Ollama)"
         return jsonify({"response": reply_text.strip(), "model_url": OLLAMA_URL})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
