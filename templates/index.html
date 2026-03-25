@@ -8,6 +8,10 @@
             font-family: Arial, sans-serif; 
             margin: 20px; 
             background: #fff8f0; 
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 15px;
         }
         #chat-box { 
             border: 6px solid #ff8c00; 
@@ -58,18 +62,20 @@
             text-align: left; 
         }
 
-        /* Code block styling (flat, clean) */
+        /* Code block styling (outside orange, clean) */
         pre {
-            background: rgba(255,255,255,0.25);
+            background: #2d2d2d;
             color: #f8f8f2;
             padding: 12px;
-            border-radius: 12px; /* rounded rectangle */
+            border-radius: 8px;
             font-size: 13px;
             font-family: Consolas, monospace;
             text-align: left;
             white-space: pre-wrap;
             word-wrap: break-word;
             line-height: 1.4;
+            max-width: 420px;
+            margin: 15px auto;
         }
         .keyword { color: #ff79c6; }
         .string { color: #f1fa8c; }
@@ -107,13 +113,10 @@
     </style>
 </head>
 <body>
-    <h1 style="text-align:center;">🍊 Orange Chat Board</h1>
-    <div id="chat-box">
-        <div class="glossy"></div>
-        <!-- Example AI response with clean Python code -->
-        <div class="ai">
-            🍊 Sure! Here is a simple Python example:<br><br>
-            <pre>
+    <h1>🍊 Orange Chat Board</h1>
+
+    <!-- Code block ABOVE the orange -->
+    <pre>
 <span class="comment"># Initialize an empty list</span>
 <span class="keyword">my_list</span> = []
 
@@ -136,9 +139,14 @@
 
 <span class="comment"># Print the final list</span>
 <span class="function">print</span>(<span class="string">"Final List:"</span>, <span class="keyword">my_list</span>)
-            </pre>
-        </div>
+    </pre>
+
+    <!-- Orange chat bubble -->
+    <div id="chat-box">
+        <div class="glossy"></div>
     </div>
+
+    <!-- Input bar neatly below -->
     <div id="input-box">
         <input type="text" id="message" placeholder="Type your message..." />
         <button onclick="sendMessage()">Send</button>
