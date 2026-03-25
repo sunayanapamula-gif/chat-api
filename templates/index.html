@@ -64,12 +64,14 @@
             padding: 20px;
             overflow-y: auto;
             transition: all 0.6s ease;
+            opacity: 0;
             z-index: 999;
         }
         #code-panel.show {
-            left: 0; /* slide in */
+            left: 0;
+            opacity: 1;
         }
-        #close-btn {
+        #close-btn, #normal-btn, #clear-btn {
             background: #ff8c00;
             color: #fff;
             border: none;
@@ -77,9 +79,9 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin: 5px;
         }
-        #close-btn:hover { background: #e67e22; }
+        #close-btn:hover, #normal-btn:hover, #clear-btn:hover { background: #e67e22; }
 
         pre {
             background: #1e1e1e;
@@ -115,7 +117,9 @@
     <!-- Code panel overlay -->
     <div id="code-panel">
         <button id="close-btn" onclick="closeCode()">Close ✖</button>
-        <pre>
+        <button id="clear-btn" onclick="clearAppear()">Clear Appear</button>
+        <button id="normal-btn" onclick="backToNormal()">Back to Normal</button>
+        <pre id="code-content">
 <span class="comment"># Initialize an empty list</span>
 <span class="keyword">my_list</span> = []
 
@@ -202,8 +206,4 @@
         }
 
         function closeCode() {
-            document.getElementById("code-panel").classList.remove("show");
-        }
-    </script>
-</body>
-</html>
+           
