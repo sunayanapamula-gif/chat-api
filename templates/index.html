@@ -4,47 +4,33 @@
     <title>🍊 Orange Chat Board</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 20px; 
-            background: linear-gradient(to bottom, #e0f7fa, #ffffff); 
-            text-align: center;
-            transition: background 0.5s ease;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; background: linear-gradient(to bottom, #e0f7fa, #ffffff); text-align: center; transition: background 0.5s ease; }
         h1 { margin-bottom: 15px; }
 
-        #chat-box { 
-            border: 8px solid #ff8c00; 
-            border-radius: 50%; 
-            background: radial-gradient(circle at center, #ffa500 55%, #ffcc80 100%);
-            width: 420px; height: 420px; margin: auto; padding: 20px; 
-            overflow-y: auto; color: #333; position: relative;
-            box-shadow: 0 0 30px rgba(255,140,0,0.6), inset 0 0 20px rgba(255,255,255,0.4);
-            transition: background 0.5s ease, box-shadow 0.5s ease;
-        }
+        #chat-box { border: 8px solid #ff8c00; border-radius: 50%; background: radial-gradient(circle at center, #ffa500 55%, #ffcc80 100%); width: 420px; height: 420px; margin: auto; padding: 20px; overflow-y: auto; color: #333; position: relative; box-shadow: 0 0 30px rgba(255,140,0,0.6), inset 0 0 20px rgba(255,255,255,0.4); transition: background 0.5s ease, box-shadow 0.5s ease; }
+        .glossy { position: absolute; top: 10%; left: 15%; width: 60%; height: 30%; background: radial-gradient(circle at top left, rgba(255,255,255,0.8), transparent 70%); border-radius: 50%; opacity: 0.7; pointer-events: none; }
 
-        .glossy {
+        /* 🍃 Leaf on top of orange with sway animation */
+        .leaf {
             position: absolute;
-            top: 10%; left: 15%;
-            width: 60%; height: 30%;
-            background: radial-gradient(circle at top left, rgba(255,255,255,0.8), transparent 70%);
-            border-radius: 50%;
-            opacity: 0.7;
-            pointer-events: none;
+            top: -25px;
+            left: 50%;
+            width: 60px;
+            height: 30px;
+            background: linear-gradient(to right, #2e7d32, #66bb6a);
+            border-radius: 50% 50% 0 0;
+            transform: translateX(-50%) rotate(-20deg);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            animation: sway 3s infinite ease-in-out;
+        }
+        @keyframes sway {
+            0% { transform: translateX(-50%) rotate(-20deg); }
+            50% { transform: translateX(-50%) rotate(-10deg); }
+            100% { transform: translateX(-50%) rotate(-20deg); }
         }
 
-        .user { 
-            background: #ff7043; color: #fff; padding: 8px 12px; 
-            border-radius: 16px; margin: 8px auto; text-align: right; 
-            font-size: 14px; display: block; max-width: 80%;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-        .ai { 
-            background: #fff3e0; color: #222; padding: 8px 12px; 
-            border-radius: 16px; margin: 8px auto; text-align: left; 
-            font-size: 14px; display: block; max-width: 80%;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
+        .user { background: #ff7043; color: #fff; padding: 8px 12px; border-radius: 16px; margin: 8px auto; text-align: right; font-size: 14px; display: block; max-width: 80%; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+        .ai { background: #fff3e0; color: #222; padding: 8px 12px; border-radius: 16px; margin: 8px auto; text-align: left; font-size: 14px; display: block; max-width: 80%; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
         .typing { font-style: italic; color: #ff8c00; margin: 6px auto; text-align: left; display: block; }
 
         #input-box { margin-top: 15px; display: flex; gap: 8px; max-width: 420px; margin-left: auto; margin-right: auto; }
@@ -52,72 +38,37 @@
         button { padding: 8px 14px; background: #ff8c00; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         button:hover { background: #e67e22; }
 
-        #theme-btn {
-            margin-top: 15px;
-            background: #333;
-            color: #fff;
-        }
+        #theme-btn { margin-top: 15px; background: #333; color: #fff; }
 
-        #code-panel {
-            position: fixed; top: 0; left: -500px; width: 400px; height: 100%;
-            background: #2d2d2d; color: #f8f8f2; box-shadow: 4px 0 12px rgba(0,0,0,0.3);
-            padding: 20px; overflow-y: auto; transition: all 0.6s ease; opacity: 0; z-index: 999;
-        }
+        #code-panel { position: fixed; top: 0; left: -500px; width: 400px; height: 100%; background: #2d2d2d; color: #f8f8f2; box-shadow: 4px 0 12px rgba(0,0,0,0.3); padding: 20px; overflow-y: auto; transition: all 0.6s ease; opacity: 0; z-index: 999; }
         #code-panel.show { left: 0; opacity: 1; }
-        #close-btn, #normal-btn, #clear-btn {
-            background: #ff8c00; color: #fff; border: none; padding: 6px 12px;
-            border-radius: 6px; cursor: pointer; font-weight: bold; margin: 5px;
-        }
+        #close-btn, #normal-btn, #clear-btn { background: #ff8c00; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; margin: 5px; }
         #close-btn:hover, #normal-btn:hover, #clear-btn:hover { background: #e67e22; }
 
-        pre { background: #1e1e1e; padding: 12px; border-radius: 8px; font-size: 13px;
-            font-family: Consolas, monospace; text-align: left; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4; }
+        /* 🎨 Syntax highlighting for code */
+        pre { background: #1e1e1e; padding: 12px; border-radius: 8px; font-size: 13px; font-family: Consolas, monospace; text-align: left; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4; }
+        .keyword { color: #ff79c6; font-weight: bold; }
+        .string { color: #f1fa8c; }
+        .comment { color: #6272a4; font-style: italic; }
 
-        /* Dark theme styles */
-        body.dark {
-            background: #121212;
-            color: #eee;
-        }
-        body.dark #chat-box {
-            background: radial-gradient(circle at center, #222 55%, #444 100%);
-            box-shadow: 0 0 40px rgba(255,255,255,0.3), inset 0 0 20px rgba(255,255,255,0.2);
-        }
+        body.dark { background: #121212; color: #eee; }
+        body.dark #chat-box { background: radial-gradient(circle at center, #222 55%, #444 100%); box-shadow: 0 0 40px rgba(255,255,255,0.3), inset 0 0 20px rgba(255,255,255,0.2); }
         body.dark .ai { background: #333; color: #fff; }
         body.dark .user { background: #ff5722; }
 
-        /* Stars shimmer with rainbow glow and drift */
-        .star {
-            position: absolute;
-            border-radius: 50%;
-            animation: twinkle 3s infinite ease-in-out, rainbowGlow 6s infinite linear, drift 10s infinite alternate ease-in-out;
-            pointer-events: none;
-        }
-
-        @keyframes twinkle {
-            0% { transform: scale(0.5); opacity: 0.3; }
-            50% { transform: scale(1.4); opacity: 1; }
-            100% { transform: scale(0.5); opacity: 0.3; }
-        }
-
-        @keyframes rainbowGlow {
-            0%   { background: radial-gradient(circle, red 60%, transparent 100%); box-shadow: 0 0 6px red, 0 0 12px red; }
-            20%  { background: radial-gradient(circle, orange 60%, transparent 100%); box-shadow: 0 0 6px orange, 0 0 12px orange; }
-            40%  { background: radial-gradient(circle, yellow 60%, transparent 100%); box-shadow: 0 0 6px yellow, 0 0 12px yellow; }
-            60%  { background: radial-gradient(circle, green 60%, transparent 100%); box-shadow: 0 0 6px green, 0 0 12px green; }
-            80%  { background: radial-gradient(circle, blue 60%, transparent 100%); box-shadow: 0 0 6px blue, 0 0 12px blue; }
-            100% { background: radial-gradient(circle, violet 60%, transparent 100%); box-shadow: 0 0 6px violet, 0 0 12px violet; }
-        }
-
-        @keyframes drift {
-            from { transform: translate(0, 0); }
-            to   { transform: translate(20px, -20px); }
-        }
+        .star { position: absolute; border-radius: 50%; animation: twinkle 3s infinite ease-in-out, rainbowGlow 6s infinite linear, drift 10s infinite alternate ease-in-out; pointer-events: none; }
+        @keyframes twinkle { 0% { transform: scale(0.5); opacity: 0.3; } 50% { transform: scale(1.4); opacity: 1; } 100% { transform: scale(0.5); opacity: 0.3; } }
+        @keyframes rainbowGlow { 0% { background: radial-gradient(circle, red 60%, transparent 100%); box-shadow: 0 0 6px red, 0 0 12px red; } 20% { background: radial-gradient(circle, orange 60%, transparent 100%); box-shadow: 0 0 6px orange, 0 0 12px orange; } 40% { background: radial-gradient(circle, yellow 60%, transparent 100%); box-shadow: 0 0 6px yellow, 0 0 12px yellow; } 60% { background: radial-gradient(circle, green 60%, transparent 100%); box-shadow: 0 0 6px green, 0 0 12px green; } 80% { background: radial-gradient(circle, blue 60%, transparent 100%); box-shadow: 0 0 6px blue, 0 0 12px blue; } 100% { background: radial-gradient(circle, violet 60%, transparent 100%); box-shadow: 0 0 6px violet, 0 0 12px violet; } }
+        @keyframes drift { from { transform: translate(0, 0); } to { transform: translate(20px, -20px); } }
     </style>
 </head>
 <body>
     <h1>🍊 Orange Chat Board</h1>
     <button id="theme-btn" onclick="toggleTheme()">Toggle Dark Theme</button>
-    <div id="chat-box"><div class="glossy"></div></div>
+    <div id="chat-box">
+        <div class="glossy"></div>
+        <div class="leaf"></div> <!-- 🍃 Leaf added -->
+    </div>
     <div id="input-box">
         <input type="text" id="message" placeholder="Type your message..." />
         <button onclick="sendMessage()">Send</button>
@@ -135,7 +86,10 @@
         const chatBox = document.getElementById("chat-box");
 
         msgInput.addEventListener("keydown", function(event) {
-            if (event.key === "Enter") { event.preventDefault(); sendMessage(); }
+                        if (event.key === "Enter") { 
+                event.preventDefault(); 
+                sendMessage(); 
+            }
         });
 
         function sendMessage() {
@@ -159,7 +113,7 @@
             fetch("/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ message: msg })
+                body: JSON.stringify({ message: msg })
             })
             .then(res => res.json())
             .then(data => {
@@ -188,7 +142,18 @@
         function generateCode(userRequest) {
             const codePanel = document.getElementById("code-panel");
             const codeContent = document.getElementById("code-content");
-            codeContent.textContent = userRequest;
+
+            const match = userRequest.match(/```([\s\S]*?)```/);
+            if (match) {
+                let code = match[1];
+                code = code.replace(/(function|const|let|var|return|if|else|for|while|class|import|from|export)/g, '<span class="keyword">$1</span>');
+                code = code.replace(/("[^"]*"|'[^']*')/g, '<span class="string">$1</span>');
+                code = code.replace(/(\/\/.*$)/gm, '<span class="comment">$1</span>');
+                codeContent.innerHTML = code;
+            } else {
+                codeContent.textContent = userRequest;
+            }
+
             codePanel.classList.add("show");
         }
 
