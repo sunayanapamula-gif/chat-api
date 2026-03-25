@@ -7,118 +7,123 @@
         body { 
             font-family: Arial, sans-serif; 
             margin: 20px; 
-            background: linear-gradient(to bottom, #e0f7fa, #ffffff); 
-            text-align: center;
+            background: #fff8f0; 
         }
-        h1 { margin-bottom: 15px; }
-
         #chat-box { 
-            border: 8px solid #ff8c00; 
+            border: 6px solid #ff8c00; 
             border-radius: 50%; 
-            background: radial-gradient(circle at center, #ffa500 55%, #ffcc80 100%);
-            width: 420px; height: 420px; margin: auto; padding: 20px; 
-            overflow-y: auto; color: #333; position: relative;
-            box-shadow: 0 0 30px rgba(255,140,0,0.6), inset 0 0 20px rgba(255,255,255,0.4);
+            background: radial-gradient(circle at center, #ffa500 60%, #ffcc80 100%);
+            width: 420px; 
+            height: 420px; 
+            margin: auto; 
+            padding: 20px; 
+            overflow-y: auto; 
+            color: #333;
+            position: relative;
         }
 
+        /* Glossy highlight */
         .glossy {
             position: absolute;
-            top: 10%; left: 15%;
-            width: 60%; height: 30%;
-            background: radial-gradient(circle at top left, rgba(255,255,255,0.8), transparent 70%);
+            top: 15%; left: 20%;
+            width: 50%; height: 25%;
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.7), transparent 70%);
             border-radius: 50%;
             opacity: 0.7;
             pointer-events: none;
         }
 
-        #chat-box::before {
-            content: "";
-            position: absolute;
-            top: -20px; left: -20px;
-            width: 460px; height: 460px;
-            border-radius: 50%;
-            border: 4px solid rgba(0, 188, 212, 0.4);
-            animation: ripple 4s infinite ease-in-out;
-        }
-        @keyframes ripple {
-            0% { transform: scale(1); opacity: 0.6; }
-            50% { transform: scale(1.1); opacity: 0.3; }
-            100% { transform: scale(1); opacity: 0.6; }
-        }
-
-        #chat-box::after {
-            content: "";
-            position: absolute;
-            bottom: 10px; right: 20px;
-            width: 12px; height: 12px;
-            background: rgba(255,255,255,0.7);
-            border-radius: 50%;
-            box-shadow: 0 -30px 0 rgba(255,255,255,0.5),
-                        -20px -60px 0 rgba(255,255,255,0.4),
-                        25px -90px 0 rgba(255,255,255,0.3);
-        }
-
         .user { 
-            background: #ff7043; color: #fff; padding: 8px 12px; 
-            border-radius: 16px; margin: 8px auto; text-align: right; 
-            font-size: 14px; display: block; max-width: 80%;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            background: #ff7043; 
+            color: #fff; 
+            padding: 8px 12px; 
+            border-radius: 12px; 
+            margin: 6px 0; 
+            text-align: right; 
+            font-size: 14px;
         }
         .ai { 
-            background: #fff3e0; color: #222; padding: 8px 12px; 
-            border-radius: 16px; margin: 8px auto; text-align: left; 
-            font-size: 14px; display: block; max-width: 80%;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            background: #fff3e0; 
+            color: #222; 
+            padding: 8px 12px; 
+            border-radius: 12px; 
+            margin: 6px 0; 
+            text-align: left; 
+            font-size: 14px;
+            font-weight: 500;
         }
-        .typing { font-style: italic; color: #ff8c00; margin: 6px auto; text-align: left; display: block; }
-
-        #input-box { margin-top: 15px; display: flex; gap: 8px; max-width: 420px; margin-left: auto; margin-right: auto; }
-        #message { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; }
-        button { padding: 8px 14px; background: #ff8c00; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #e67e22; }
-
-        #code-panel {
-            position: fixed; top: 0; left: -500px; width: 400px; height: 100%;
-            background: #2d2d2d; color: #f8f8f2; box-shadow: 4px 0 12px rgba(0,0,0,0.3);
-            padding: 20px; overflow-y: auto; transition: all 0.6s ease; opacity: 0; z-index: 999;
+        .typing { 
+            font-style: italic; 
+            color: #ff8c00; 
+            margin: 6px 0; 
+            text-align: left; 
         }
-        #code-panel.show { left: 0; opacity: 1; }
-        #close-btn, #normal-btn, #clear-btn {
-            background: #ff8c00; color: #fff; border: none; padding: 6px 12px;
-            border-radius: 6px; cursor: pointer; font-weight: bold; margin: 5px;
-        }
-        #close-btn:hover, #normal-btn:hover, #clear-btn:hover { background: #e67e22; }
 
-        pre { background: #1e1e1e; padding: 12px; border-radius: 8px; font-size: 13px;
-            font-family: Consolas, monospace; text-align: left; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4; }
+        /* Code block styling */
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 10px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 13px;
+            font-family: Consolas, monospace;
+        }
+        .keyword { color: #ff79c6; }
+        .string { color: #f1fa8c; }
+        .comment { color: #6272a4; font-style: italic; }
+        .function { color: #50fa7b; }
     </style>
 </head>
 <body>
-    <h1>🍊 Orange Chat Board</h1>
-    <div id="chat-box"><div class="glossy"></div></div>
+    <h1 style="text-align:center;">🍊 Orange Chat Board</h1>
+    <div id="chat-box">
+        <div class="glossy"></div>
+        <!-- Example AI response with colored Python code -->
+        <div class="ai">
+            🍊 Sure! Here is a simple Python example:<br><br>
+            <pre>
+<span class="comment"># Initialize an empty list</span>
+<span class="keyword">my_list</span> = []
+
+<span class="comment"># Add some elements to the list</span>
+<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"apple"</span>)
+<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"banana"</span>)
+<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"cherry"</span>)
+
+<span class="comment"># Print the initial list</span>
+<span class="function">print</span>(<span class="string">"Initial List:"</span>, <span class="keyword">my_list</span>)
+
+<span class="comment"># Modify (update) an element</span>
+<span class="keyword">my_list</span>[1] = <span class="string">"blueberry"</span>
+
+<span class="comment"># Print the updated list</span>
+<span class="function">print</span>(<span class="string">"Updated List:"</span>, <span class="keyword">my_list</span>)
+
+<span class="comment"># Add a new element</span>
+<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"date"</span>)
+
+<span class="comment"># Print the final list</span>
+<span class="function">print</span>(<span class="string">"Final List:"</span>, <span class="keyword">my_list</span>)
+            </pre>
+        </div>
+    </div>
     <div id="input-box">
         <input type="text" id="message" placeholder="Type your message..." />
         <button onclick="sendMessage()">Send</button>
     </div>
 
-    <div id="code-panel">
-        <button id="close-btn" onclick="closeCode()">Close ✖</button>
-        <button id="clear-btn" onclick="clearAppear()">Clear Appear</button>
-        <button id="normal-btn" onclick="backToNormal()">Back to Normal</button>
-        <pre id="code-content"></pre>
-    </div>
-
     <script>
         const msgInput = document.getElementById("message");
 
-        msgInput.addEventListener("keydown", function(event) {
+        msgInput.addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
                 sendMessage();
             }
         });
 
-        function sendMessage() {
+        async function sendMessage() {
             const msg = msgInput.value.trim();
             if (!msg) return;
 
@@ -126,7 +131,7 @@
 
             const userBubble = document.createElement("div");
             userBubble.className = "user";
-            userBubble.innerHTML = "😳 " + msg;
+            userBubble.innerHTML = "🙂 " + msg;
             chatBox.appendChild(userBubble);
 
             msgInput.value = "";
@@ -137,73 +142,31 @@
             chatBox.appendChild(typingBubble);
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            setTimeout(() => {
+            try {
+                const res = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: msg })
+                });
+                const data = await res.json();
+
                 chatBox.removeChild(typingBubble);
 
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
-                aiBubble.innerHTML = msg.toLowerCase().includes("code") 
-                    ? "🍊 Generating your code..." 
-                    : "🍊 Got your message!";
+                aiBubble.innerHTML = "🍊 " + (data.response || "Error: No reply");
                 chatBox.appendChild(aiBubble);
+
                 chatBox.scrollTop = chatBox.scrollHeight;
-
-                if (msg.toLowerCase().includes("code")) {
-                    generateCode(msg);
-                }
-            }, 800);
-        }
-
-        function generateCode(userRequest) {
-            const codePanel = document.getElementById("code-panel");
-            const codeContent = document.getElementById("code-content");
-
-            if (userRequest.toLowerCase().includes("list")) {
-                codeContent.textContent = `
-# Initialize an empty list
-my_list = []
-
-# Add some elements
-my_list.append("apple")
-my_list.append("banana")
-my_list.append("cherry")
-
-print("Initial List:", my_list)
-
-# Modify an element
-my_list[1] = "blueberry"
-print("Updated List:", my_list)
-
-# Add a new element
-my_list.append("date")
-print("Final List:", my_list)
-                `;
-            } else {
-                codeContent.textContent = "# Example code for: " + userRequest;
+            } catch (err) {
+                chatBox.removeChild(typingBubble);
+                const errorBubble = document.createElement("div");
+                errorBubble.className = "ai";
+                errorBubble.style.color = "red";
+                errorBubble.innerHTML = "⚠️ Error: " + err.message;
+                chatBox.appendChild(errorBubble);
             }
-
-            codePanel.classList.add("show");
-        }
-
-        function closeCode() {
-            document.getElementById("code-panel").classList.remove("show");
-        }
-
-        function clearAppear() {
-            const codePanel = document.getElementById("code-panel");
-            codePanel.style.opacity = "0";
-            setTimeout(() => {
-                codePanel.style.opacity = "1";
-            }, 600);
-        }
-
-                function backToNormal() {
-            const codePanel = document.getElementById("code-panel");
-            const codeContent = document.getElementById("code-content");
-            codeContent.textContent = ""; // clear code
-            codePanel.classList.remove("show"); // hide panel
-            codePanel.style.opacity = "0"; // reset fade
         }
     </script>
 </body>
-</html> 
+</html>
