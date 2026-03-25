@@ -119,35 +119,13 @@
         <button id="close-btn" onclick="closeCode()">Close ✖</button>
         <button id="clear-btn" onclick="clearAppear()">Clear Appear</button>
         <button id="normal-btn" onclick="backToNormal()">Back to Normal</button>
-        <pre id="code-content">
-<span class="comment"># Initialize an empty list</span>
-<span class="keyword">my_list</span> = []
-
-<span class="comment"># Add some elements to the list</span>
-<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"apple"</span>)
-<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"banana"</span>)
-<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"cherry"</span>)
-
-<span class="comment"># Print the initial list</span>
-<span class="function">print</span>(<span class="string">"Initial List:"</span>, <span class="keyword">my_list</span>)
-
-<span class="comment"># Modify (update) an element</span>
-<span class="keyword">my_list</span>[1] = <span class="string">"blueberry"</span>
-
-<span class="comment"># Print the updated list</span>
-<span class="function">print</span>(<span class="string">"Updated List:"</span>, <span class="keyword">my_list</span>)
-
-<span class="comment"># Add a new element</span>
-<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"date"</span>)
-
-<span class="comment"># Print the final list</span>
-<span class="function">print</span>(<span class="string">"Final List:"</span>, <span class="keyword">my_list</span>)
-        </pre>
+        <pre id="code-content"></pre>
     </div>
 
     <script>
         const msgInput = document.getElementById("message");
 
+        // Enter key works
         msgInput.addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
@@ -175,12 +153,8 @@
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                const res = await fetch("/chat", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: msg })
-                });
-                const data = await res.json();
+                // Simulated AI response
+                const data = { response: "Here is your code example!" };
 
                 chatBox.removeChild(typingBubble);
 
@@ -193,7 +167,7 @@
 
                 // If user asked for code, show code panel
                 if (msg.toLowerCase().includes("code")) {
-                    document.getElementById("code-panel").classList.add("show");
+                    showCode();
                 }
             } catch (err) {
                 chatBox.removeChild(typingBubble);
@@ -205,5 +179,30 @@
             }
         }
 
-        function closeCode() {
-           
+        function showCode() {
+            const codePanel = document.getElementById("code-panel");
+            const codeContent = document.getElementById("code-content");
+            codeContent.innerHTML = `
+<span class="comment"># Initialize an empty list</span>
+<span class="keyword">my_list</span> = []
+
+<span class="comment"># Add some elements to the list</span>
+<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"apple"</span>)
+<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"banana"</span>)
+<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"cherry"</span>)
+
+<span class="comment"># Print the initial list</span>
+<span class="function">print</span>(<span class="string">"Initial List:"</span>, <span class="keyword">my_list</span>)
+
+<span class="comment"># Modify (update) an element</span>
+<span class="keyword">my_list</span>[1] = <span class="string">"blueberry"</span>
+
+<span class="comment"># Print the updated list</span>
+<span class="function">print</span>(<span class="string">"Updated List:"</span>, <span class="keyword">my_list</span>)
+
+<span class="comment"># Add a new element</span>
+<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"date"</span>)
+
+<span class="comment"># Print the final list</span>
+<span class="function">print</span>(<span class="string">"Final List:"</span>, <span class="keyword">my_list</span>)
+            `;
