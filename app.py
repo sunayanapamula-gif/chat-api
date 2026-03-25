@@ -1,67 +1,31 @@
-import os
-import json
+from flask import Flask, request, jsonify
 import requests
-from flask import Flask, request, jsonify, render_template
-from flask_cors import CORS
+import json
 
-app = Flask(__name__, static_folder="static", template_folder="templates")
-CORS(app)
+app = Flask(__name__)
 
-# Configuration
-OLLAMA_URL = os.environ.get("OLLAMA_URL", "https://nonsuppressed-glottal-tonette.ngrok-free.dev")
-OLLAMA_MODEL = "mistral:latest"
-
-@app.route("/")
-def home():
-    return render_template("index.html")
-
-@app.route("/ping", methods=["GET"])
-def ping():
-    try:
-        res = requests.post(
-            f"{OLLAMA_URL}/api/generate",
-            json={"model": OLLAMA_MODEL, "prompt": "ping"},
-            stream=True
-        )
-        reply_text = ""
-        for line in res.iter_lines():
-            if line:
-                try:
-                    j = json.loads(line.decode("utf-8"))
-                    if "response" in j:
-                        reply_text += j["response"]
-                except:
-                    pass
-        return jsonify({"status": "ok", "ollama_reply": reply_text.strip(), "model_url": OLLAMA_URL})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+OLLAMA_URL = "http://localhost:11434/api/generate"
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    data = request.get_json(force=True)
-    user_input = data.get("message", "")
+    user_message = request.json.get("message", "")
+    payload = {
+        "model": "mistral:latest",
+        "prompt": user_message,
+        "stream": True
+    }
 
+    reply_text = ""
     try:
-        res = requests.post(
-            f"{OLLAMA_URL}/api/generate",
-            json={"model": OLLAMA_MODEL, "prompt": user_input},
-            stream=True
-        )
-
-        reply_text = ""
+        res = requests.post(OLLAMA_URL, json=payload, stream=True)
         for line in res.iter_lines():
             if line:
-                try:
-                    j = json.loads(line.decode("utf-8"))
-                    if "response" in j:
-                        reply_text += j["response"]
-                except:
-                    pass
-
-        return jsonify({"response": reply_text.strip(), "model_url": OLLAMA_URL})
+                data = json.loads(line.decode("utf-8"))
+                if "response" in data:
+                    reply_text += data["response"]
+                if data.get("done", False):
+                    break
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"response": f"Error: {str(e)}"})
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+    return jsonify({"response": reply_text})
