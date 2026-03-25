@@ -58,7 +58,7 @@ def chat():
                 except:
                     pass
 
-        return jsonify({"response": reply_text.strip(), "model_url": OLLAMA_URL})
+        return jsonify({"response": reply_text.strip(), "model_url": https://nonsuppressed-glottal-tonette.ngrok-free.dev})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
