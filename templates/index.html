@@ -1,68 +1,67 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>🍉 Watermelon Chat Board</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
-        #chat-box { border: 2px solid #006600; border-radius: 12px; background: #ffcccc;
-                    width: 400px; height: 400px; margin: auto; padding: 10px;
-                    overflow-y: auto; }
-        .user { background: #4a90e2; color: #fff; padding: 6px 10px; border-radius: 10px;
-                margin: 6px 0; text-align: right; }
-        .ai { background: #e1e8ed; color: #333; padding: 6px 10px; border-radius: 10px;
-              margin: 6px 0; text-align: left; }
-        #input-box { margin-top: 10px; display: flex; gap: 8px; max-width: 400px; margin: 10px auto; }
-        #message { flex: 1; padding: 6px; border-radius: 8px; border: 1px solid #ccc; }
-        button { padding: 6px 12px; background: #ff6f61; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
-        button:hover { background: #e85b50; }
-    </style>
-</head>
-<body>
-    <h1 style="text-align:center;">🍉 Watermelon Chat Board</h1>
-    <div id="chat-box"></div>
-    <div id="input-box">
-        <input type="text" id="message" placeholder="Type your message..." />
-        <button onclick="sendMessage()">Send</button>
-    </div>
+import os
+import json
+import requests
+from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 
-    <script>
-        async function sendMessage() {
-            const msgInput = document.getElementById("message");
-            const msg = msgInput.value.trim();
-            if (!msg) return;
+app = Flask(__name__, static_folder="static", template_folder="templates")
+CORS(app)
 
-            const chatBox = document.getElementById("chat-box");
+# Ollama URL points to your ngrok tunnel (Railway variable overrides if set)
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "https://nonsuppressed-glottal-tonette.ngrok-free.dev")
+OLLAMA_MODEL = "mistral:latest"
 
-            const userBubble = document.createElement("div");
-            userBubble.className = "user";
-            userBubble.innerHTML = msg;
-            chatBox.appendChild(userBubble);
+@app.route("/")
+def home():
+    return render_template("index.html")
 
-            msgInput.value = "";
+@app.route("/ping", methods=["GET"])
+def ping():
+    try:
+        res = requests.post(
+            f"{OLLAMA_URL}/api/generate",
+            json={"model": OLLAMA_MODEL, "prompt": "ping"},
+            stream=True
+        )
+        reply_text = ""
+        for line in res.iter_lines():
+            if line:
+                try:
+                    j = json.loads(line.decode("utf-8"))
+                    if "response" in j:
+                        reply_text += j["response"]
+                except:
+                    pass
+        return jsonify({"status": "ok", "ollama_reply": reply_text.strip(), "model_url": OLLAMA_URL})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
-            try {
-                const res = await fetch("/chat", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: msg })
-                });
-                const data = await res.json();
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.get_json(force=True)
+    user_input = data.get("message", "")
 
-                const aiBubble = document.createElement("div");
-                aiBubble.className = "ai";
-                aiBubble.innerHTML = data.response;
-                chatBox.appendChild(aiBubble);
+    try:
+        res = requests.post(
+            f"{OLLAMA_URL}/api/generate",
+            json={"model": OLLAMA_MODEL, "prompt": user_input},
+            stream=True
+        )
 
-                chatBox.scrollTop = chatBox.scrollHeight;
-            } catch (err) {
-                const errorBubble = document.createElement("div");
-                errorBubble.className = "ai";
-                errorBubble.style.color = "red";
-                errorBubble.innerHTML = "Error: " + err.message;
-                chatBox.appendChild(errorBubble);
-            }
-        }
-    </script>
-</body>
-</html>
+        reply_text = ""
+        for line in res.iter_lines():
+            if line:
+                try:
+                    j = json.loads(line.decode("utf-8"))
+                    if "response" in j:
+                        reply_text += j["response"]
+                except:
+                    pass
+
+        return jsonify({"response": reply_text.strip(), "model_url": OLLAMA_URL})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
