@@ -20,7 +20,6 @@
             width: 420px; height: 420px; margin: auto; padding: 20px; 
             overflow-y: auto; color: #333; position: relative;
             box-shadow: 0 0 30px rgba(255,140,0,0.6), inset 0 0 20px rgba(255,255,255,0.4);
-            transition: background 0.5s ease, box-shadow 0.5s ease;
         }
 
         .glossy {
@@ -69,8 +68,6 @@
         button { padding: 8px 14px; background: #ff8c00; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         button:hover { background: #e67e22; }
 
-        #theme-btn { margin-top: 15px; background: #333; color: #fff; }
-
         #code-panel {
             position: fixed; top: 0; left: -500px; width: 400px; height: 100%;
             background: #2d2d2d; color: #f8f8f2; box-shadow: 4px 0 12px rgba(0,0,0,0.3);
@@ -86,13 +83,7 @@
         pre { background: #1e1e1e; padding: 12px; border-radius: 8px; font-size: 13px;
             font-family: Consolas, monospace; text-align: left; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4; }
 
-        /* Dark theme styles */
-        body.dark { background: #121212; color: #eee; }
-        body.dark #chat-box { background: radial-gradient(circle at center, #222 55%, #444 100%); box-shadow: 0 0 40px rgba(255,215,0,0.4), inset 0 0 20px rgba(255,215,0,0.2); }
-        body.dark .ai { background: #333; color: #ffd700; }
-        body.dark .user { background: #ff5722; }
-
-        /* Golden star sparkles */
+        /* Sparkles */
         .sparkle {
             position: absolute;
             width: 8px; height: 8px;
@@ -128,7 +119,6 @@
 </head>
 <body>
     <h1>🍊 Orange Chat Board</h1>
-    <button id="theme-btn" onclick="toggleTheme()">Toggle Dark Theme</button>
     <div id="chat-box"><div class="glossy"></div></div>
     <div id="input-box">
         <input type="text" id="message" placeholder="Type your message..." />
@@ -143,18 +133,15 @@
     </div>
 
     <!-- Real Betta Fish Image -->
-    <img id="betta" src="chat-api/images/beta.png" alt="Betta Fish">
+    <img id="betta" src="chat-api/images/betta.png" alt="Betta Fish">
 
     <script>
         const msgInput = document.getElementById("message");
         const chatBox = document.getElementById("chat-box");
         const betta = document.getElementById("betta");
 
-                msgInput.addEventListener("keydown", function(event) {
-            if (event.key === "Enter") { 
-                event.preventDefault(); 
-                sendMessage(); 
-            }
+        msgInput.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") { event.preventDefault(); sendMessage(); }
         });
 
         function sendMessage() {
@@ -170,56 +157,38 @@
 
             const typingBubble = document.createElement("div");
             typingBubble.className = "typing";
-            typingBubble.innerHTML = "🤖 AI is thinking...";
+            typingBubble.innerHTML = "🤖 AI is generating...";
             chatBox.appendChild(typingBubble);
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            setTimeout(() => {
+                        // Call Ollama API via ngrok
+            fetch("https://nonsuppressed-glottal-tonette.ngrok-free.dev/api/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: "llama3.2",   // adjust to the exact model you run
+                    prompt: msg
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
                 chatBox.removeChild(typingBubble);
 
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
-                aiBubble.innerHTML = msg.toLowerCase().includes("code") 
-                    ? "🍊 Generating your code..." 
-                    : "🍊 Got your message!";
+                aiBubble.innerHTML = "🍊 " + (data.response || "No reply");
                 chatBox.appendChild(aiBubble);
                 chatBox.scrollTop = chatBox.scrollHeight;
+            })
+            .catch(err => {
+                chatBox.removeChild(typingBubble);
 
-                if (msg.toLowerCase().includes("code")) {
-                    generateCode(msg);
-                }
-            }, 800);
-        }
-
-        function generateCode(userRequest) {
-            const codePanel = document.getElementById("code-panel");
-            const codeContent = document.getElementById("code-content");
-
-            if (userRequest.toLowerCase().includes("list")) {
-                codeContent.textContent = `
-# Initialize an empty list
-my_list = []
-
-# Add some elements
-my_list.append("apple")
-my_list.append("banana")
-my_list.append("cherry")
-
-print("Initial List:", my_list)
-
-# Modify an element
-my_list[1] = "blueberry"
-print("Updated List:", my_list)
-
-# Add a new element
-my_list.append("date")
-print("Final List:", my_list)
-                `;
-            } else {
-                codeContent.textContent = "# Example code for: " + userRequest;
-            }
-
-            codePanel.classList.add("show");
+                const aiBubble = document.createElement("div");
+                aiBubble.className = "ai";
+                aiBubble.innerHTML = "⚠️ Error contacting Ollama: " + err.message;
+                chatBox.appendChild(aiBubble);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
         }
 
         function closeCode() {
@@ -242,22 +211,19 @@ print("Final List:", my_list)
             codePanel.style.opacity = "0"; 
         }
 
-        // Dark theme toggle with golden sparkles
-        function toggleTheme() {
-            document.body.classList.toggle("dark");
+        // Sparkles always visible
+        function addSparkles() {
             document.querySelectorAll(".sparkle").forEach(s => s.remove());
-
-            if (document.body.classList.contains("dark")) {
-                for (let i = 0; i < 12; i++) {
-                    const sparkle = document.createElement("div");
-                    sparkle.className = "sparkle";
-                    sparkle.style.top = Math.random() * 380 + "px";
-                    sparkle.style.left = Math.random() * 380 + "px";
-                    sparkle.style.animationDelay = (Math.random() * 2) + "s";
-                    document.getElementById("chat-box").appendChild(sparkle);
-                }
+            for (let i = 0; i < 12; i++) {
+                const sparkle = document.createElement("div");
+                sparkle.className = "sparkle";
+                sparkle.style.top = Math.random() * 380 + "px";
+                sparkle.style.left = Math.random() * 380 + "px";
+                sparkle.style.animationDelay = (Math.random() * 2) + "s";
+                document.getElementById("chat-box").appendChild(sparkle);
             }
         }
+        addSparkles();
 
         // Random betta fish movement
         function moveBettaRandomly() {
