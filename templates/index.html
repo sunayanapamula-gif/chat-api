@@ -177,5 +177,88 @@
 
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
-                aiBubble.innerHTML = msg.toLowerCase().includes("code") 
-                    ? "
+                                aiBubble.innerHTML = msg.toLowerCase().includes("code") 
+                    ? "🍊 Generating your code..." 
+                    : "🍊 Got your message!";
+                chatBox.appendChild(aiBubble);
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                if (msg.toLowerCase().includes("code")) {
+                    generateCode(msg);
+                }
+            }, 800);
+        }
+
+        function generateCode(userRequest) {
+            const codePanel = document.getElementById("code-panel");
+            const codeContent = document.getElementById("code-content");
+
+            if (userRequest.toLowerCase().includes("list")) {
+                codeContent.textContent = `
+# Initialize an empty list
+my_list = []
+
+# Add some elements
+my_list.append("apple")
+my_list.append("banana")
+my_list.append("cherry")
+
+print("Initial List:", my_list)
+
+# Modify an element
+my_list[1] = "blueberry"
+print("Updated List:", my_list)
+
+# Add a new element
+my_list.append("date")
+print("Final List:", my_list)
+                `;
+            } else {
+                codeContent.textContent = "# Example code for: " + userRequest;
+            }
+
+            codePanel.classList.add("show");
+        }
+
+        function closeCode() {
+            document.getElementById("code-panel").classList.remove("show");
+        }
+
+        function clearAppear() {
+            const codePanel = document.getElementById("code-panel");
+            codePanel.style.opacity = "0";
+            setTimeout(() => {
+                codePanel.style.opacity = "1";
+            }, 600);
+        }
+
+        function backToNormal() {
+            const codePanel = document.getElementById("code-panel");
+            const codeContent = document.getElementById("code-content");
+            codeContent.textContent = ""; 
+            codePanel.classList.remove("show"); 
+            codePanel.style.opacity = "0"; 
+        }
+
+        // Dark theme toggle with tiny glowing stars
+        function toggleTheme() {
+            document.body.classList.toggle("dark");
+
+            // Remove old stars
+            document.querySelectorAll(".star").forEach(s => s.remove());
+
+            if (document.body.classList.contains("dark")) {
+                // Add tiny glowing white stars inside orange
+                for (let i = 0; i < 20; i++) {
+                    const star = document.createElement("div");
+                    star.className = "star";
+                    star.style.top = Math.random() * 380 + "px";
+                    star.style.left = Math.random() * 380 + "px";
+                    star.style.animationDelay = (Math.random() * 2) + "s";
+                    document.getElementById("chat-box").appendChild(star);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
