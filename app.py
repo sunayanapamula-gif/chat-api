@@ -32,7 +32,8 @@ def chat():
             json={"model": OLLAMA_MODEL, "prompt": user_input},
             stream=True
         )
-                reply_text = ""
+
+        reply_text = ""
         for line in res.iter_lines():
             if line:
                 try:
