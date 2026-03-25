@@ -7,7 +7,7 @@ from flask_cors import CORS
 app = Flask(__name__, static_folder="static", template_folder="templates")
 CORS(app)
 
-# Configuration
+# Ollama URL points to your ngrok tunnel (Railway variable overrides if set)
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "https://nonsuppressed-glottal-tonette.ngrok-free.dev")
 OLLAMA_MODEL = "mistral:latest"
 
