@@ -48,20 +48,14 @@
             animation: ripple 4s infinite ease-in-out;
         }
 
-        .user { 
-            background: #ff7043; color: #fff; padding: 8px 12px; 
-            border-radius: 16px; margin: 8px auto; text-align: right; 
-            font-size: 14px; display: block; max-width: 80%;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        .user, .ai {
+            padding: 8px 12px; margin: 8px auto; max-width: 80%;
+            border-radius: 16px; font-size: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             animation: fadeIn 0.4s ease forwards;
         }
-        .ai { 
-            background: #fff3e0; color: #222; padding: 8px 12px; 
-            border-radius: 16px; margin: 8px auto; text-align: left; 
-            font-size: 14px; display: block; max-width: 80%;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-            animation: fadeIn 0.4s ease forwards;
-        }
+        .user { background: #ff7043; color: #fff; text-align: right; }
+        .ai { background: #fff3e0; color: #222; text-align: left; }
+
         .typing { font-style: italic; color: #ff8c00; margin: 6px auto; text-align: left; display: block; animation: fadeIn 0.4s ease forwards; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -73,13 +67,6 @@
 
         #theme-btn { margin-top: 15px; background: #333; color: #fff; }
 
-        #code-panel { position: fixed; top: 0; left: -500px; width: 400px; height: 100%; background: #2d2d2d; color: #f8f8f2; box-shadow: 4px 0 12px rgba(0,0,0,0.3); padding: 20px; overflow-y: auto; transition: all 0.6s ease; opacity: 0; z-index: 999; }
-        #code-panel.show { left: 0; opacity: 1; }
-        #close-btn, #normal-btn, #clear-btn { background: #ff8c00; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; margin: 5px; }
-        #close-btn:hover, #normal-btn:hover, #clear-btn:hover { background: #e67e22; }
-
-        pre { background: #1e1e1e; padding: 12px; border-radius: 8px; font-size: 13px; font-family: Consolas, monospace; text-align: left; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4; }
-
         /* Dark theme styles */
         body.dark { background: #121212; color: #eee; }
         body.dark #chat-box { background: radial-gradient(circle at center, #222 55%, #444 100%); box-shadow: 0 0 40px rgba(255,215,0,0.4), inset 0 0 20px rgba(255,215,0,0.2); }
@@ -89,12 +76,12 @@
         /* Golden star sparkles */
         .sparkle {
             position: absolute;
-            width: 10px; height: 10px;
-            background: radial-gradient(circle, #ffd700 40%, transparent 70%);
+            width: 3px; height: 3px; /* very small stars */
+            background: radial-gradient(circle, #ffd700 70%, transparent 100%);
             border-radius: 50%;
             animation: sparkle 1.5s infinite ease-in-out;
             pointer-events: none;
-            box-shadow: 0 0 8px #ffd700, 0 0 12px #ffec8b;
+            box-shadow: 0 0 6px #ffd700, 0 0 12px #ffec8b;
         }
         @keyframes sparkle {
             0% { transform: scale(0.5); opacity: 0.5; }
@@ -110,13 +97,6 @@
     <div id="input-box">
         <input type="text" id="message" placeholder="Type your message..." />
         <button onclick="sendMessage()">Send</button>
-    </div>
-
-    <div id="code-panel">
-        <button id="close-btn" onclick="closeCode()">Close ✖</button>
-        <button id="clear-btn" onclick="clearAppear()">Clear Appear</button>
-        <button id="normal-btn" onclick="backToNormal()">Back to Normal</button>
-        <pre id="code-content"></pre>
     </div>
 
     <script>
@@ -143,7 +123,7 @@
 
             const typingBubble = document.createElement("div");
             typingBubble.className = "typing";
-            typingBubble.innerHTML = "🤖 AI is thinking...";
+            typingBubble.innerHTML = "🤖 AI is generating...";
             chatBox.appendChild(typingBubble);
             chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -153,21 +133,15 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ message: msg })
                 });
-                                const data = await res.json();
+                const data = await res.json();
 
                 chatBox.removeChild(typingBubble);
 
-                let reply = data.response || "";
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
-                aiBubble.innerHTML = "🍊 " + reply;
+                aiBubble.innerHTML = "🍊 " + (data.response || "(no reply from Ollama)");
                 chatBox.appendChild(aiBubble);
                 chatBox.scrollTop = chatBox.scrollHeight;
-
-                // If the reply looks like code, also show in code panel
-                if (msg.toLowerCase().includes("code")) {
-                    showCodePanel(reply);
-                }
             } catch (err) {
                 chatBox.removeChild(typingBubble);
                 const aiBubble = document.createElement("div");
@@ -175,31 +149,6 @@
                 aiBubble.innerHTML = "🍊 Error: " + err.message;
                 chatBox.appendChild(aiBubble);
             }
-        }
-
-        function showCodePanel(reply) {
-            const codePanel = document.getElementById("code-panel");
-            const codeContent = document.getElementById("code-content");
-            codeContent.textContent = reply;
-            codePanel.classList.add("show");
-        }
-
-        function closeCode() {
-            document.getElementById("code-panel").classList.remove("show");
-        }
-
-        function clearAppear() {
-            const codePanel = document.getElementById("code-panel");
-            codePanel.style.opacity = "0";
-            setTimeout(() => { codePanel.style.opacity = "1"; }, 600);
-        }
-
-        function backToNormal() {
-            const codePanel = document.getElementById("code-panel");
-            const codeContent = document.getElementById("code-content");
-            codeContent.textContent = "";
-            codePanel.classList.remove("show");
-            codePanel.style.opacity = "0";
         }
 
         // Dark theme toggle with golden star sparkles
@@ -211,11 +160,11 @@
 
             if (document.body.classList.contains("dark")) {
                 const chatBox = document.getElementById("chat-box");
-                for (let i = 0; i < 12; i++) {
+                for (let i = 0; i < 20; i++) { // more stars
                     const sparkle = document.createElement("div");
                     sparkle.className = "sparkle";
-                    sparkle.style.top = Math.random() * (chatBox.offsetHeight - 20) + "px";
-                    sparkle.style.left = Math.random() * (chatBox.offsetWidth - 20) + "px";
+                    sparkle.style.top = Math.random() * (chatBox.offsetHeight - 10) + "px";
+                    sparkle.style.left = Math.random() * (chatBox.offsetWidth - 10) + "px";
                     sparkle.style.animationDelay = (Math.random() * 2) + "s";
                     chatBox.appendChild(sparkle);
                 }
