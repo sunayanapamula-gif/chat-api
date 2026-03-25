@@ -142,10 +142,10 @@
         <pre id="code-content"></pre>
     </div>
 
-    <!-- Real Betta Fish Image -->
+        <!-- Real Betta Fish Image -->
     <img id="betta" src="../images/betta.png" alt="Betta Fish">
 
-        <script>
+    <script>
         const msgInput = document.getElementById("message");
         const chatBox = document.getElementById("chat-box");
         const betta = document.getElementById("betta");
@@ -192,6 +192,11 @@
                 aiBubble.innerHTML = "🍊 " + (data.response || "No reply");
                 chatBox.appendChild(aiBubble);
                 chatBox.scrollTop = chatBox.scrollHeight;
+
+                // If AI response contains code, show in code panel
+                if (data.response && data.response.includes("```")) {
+                    generateCode(data.response);
+                }
             })
             .catch(err => {
                 chatBox.removeChild(typingBubble);
@@ -204,34 +209,11 @@
             });
         }
 
+        // Code panel functions
         function generateCode(userRequest) {
             const codePanel = document.getElementById("code-panel");
             const codeContent = document.getElementById("code-content");
-
-            if (userRequest.toLowerCase().includes("list")) {
-                codeContent.textContent = `
-# Initialize an empty list
-my_list = []
-
-# Add some elements
-my_list.append("apple")
-my_list.append("banana")
-my_list.append("cherry")
-
-print("Initial List:", my_list)
-
-# Modify an element
-my_list[1] = "blueberry"
-print("Updated List:", my_list)
-
-# Add a new element
-my_list.append("date")
-print("Final List:", my_list)
-                `;
-            } else {
-                codeContent.textContent = "# Example code for: " + userRequest;
-            }
-
+            codeContent.textContent = userRequest;
             codePanel.classList.add("show");
         }
 
