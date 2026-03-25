@@ -126,14 +126,14 @@
         const msgInput = document.getElementById("message");
 
         // Enter key works
-        msgInput.addEventListener("keypress", function(event) {
+        msgInput.addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
                 sendMessage();
             }
         });
 
-        async function sendMessage() {
+        function sendMessage() {
             const msg = msgInput.value.trim();
             if (!msg) return;
 
@@ -152,31 +152,20 @@
             chatBox.appendChild(typingBubble);
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            try {
-                // Simulated AI response
-                const data = { response: "Here is your code example!" };
-
+            setTimeout(() => {
                 chatBox.removeChild(typingBubble);
 
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
-                aiBubble.innerHTML = "🍊 " + (data.response || "Error: No reply");
+                aiBubble.innerHTML = "🍊 " + "Got your message!";
                 chatBox.appendChild(aiBubble);
-
                 chatBox.scrollTop = chatBox.scrollHeight;
 
                 // If user asked for code, show code panel
                 if (msg.toLowerCase().includes("code")) {
                     showCode();
                 }
-            } catch (err) {
-                chatBox.removeChild(typingBubble);
-                const errorBubble = document.createElement("div");
-                errorBubble.className = "ai";
-                errorBubble.style.color = "red";
-                errorBubble.innerHTML = "⚠️ Error: " + err.message;
-                chatBox.appendChild(errorBubble);
-            }
+            }, 800);
         }
 
         function showCode() {
@@ -206,3 +195,13 @@
 <span class="comment"># Print the final list</span>
 <span class="function">print</span>(<span class="string">"Final List:"</span>, <span class="keyword">my_list</span>)
             `;
+            codePanel.classList.add("show");
+        }
+
+        function closeCode() {
+            document.getElementById("code-panel").classList.remove("show");
+        }
+
+        function clearAppear() {
+            const codePanel = document.getElementById("code-panel");
+            codePanel
