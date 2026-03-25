@@ -32,7 +32,11 @@ def ping():
                         reply_text += j["response"]
                 except:
                     pass
-        return jsonify({"status": "ok", "ollama_reply": reply_text.strip(), "model_url": OLLAMA_URL})
+        return jsonify({
+            "status": "ok",
+            "ollama_reply": reply_text.strip(),
+            "model_url": OLLAMA_URL
+        })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
