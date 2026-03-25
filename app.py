@@ -1,17 +1,18 @@
 from flask import Flask, request, jsonify
 import requests
 import json
+import os
 
 app = Flask(__name__)
 
-# Use your ngrok-exposed Ollama API
+# Point to your ngrok-exposed Ollama server
 OLLAMA_URL = "https://nonsuppressed-glottal-tonette.ngrok-free.dev/api/generate"
 
-@app.route("/chat", methods=["POST"])
-def chat():
+@app.route("/", methods=["POST"])
+def root_chat():
     user_message = request.json.get("message", "")
     payload = {
-        "model": "mistral:latest",   # you can change to another model if needed
+        "model": "mistral:latest",
         "prompt": user_message,
         "stream": True
     }
@@ -35,4 +36,5 @@ def chat():
     })
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
