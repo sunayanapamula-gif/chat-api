@@ -8,7 +8,7 @@ app = Flask(__name__, static_folder="static", template_folder="templates")
 CORS(app)
 
 # Configuration
-OLLAMA_URL = os.environ.get("OLLAMA_URL", "https://nonsuppressed-glottal-tonette.ngrok-free.dev")
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")  # Ollama default
 OLLAMA_MODEL = "mistral:latest"
 
 @app.route("/")
@@ -17,28 +17,7 @@ def home():
 
 @app.route("/ping", methods=["GET"])
 def ping():
-    try:
-        res = requests.post(
-            f"{OLLAMA_URL}/api/generate",
-            json={"model": OLLAMA_MODEL, "prompt": "ping"},
-            stream=True
-        )
-        reply_text = ""
-        for line in res.iter_lines():
-            if line:
-                try:
-                    j = json.loads(line.decode("utf-8"))
-                    if "response" in j:
-                        reply_text += j["response"]
-                except:
-                    pass
-        return jsonify({
-            "status": "ok",
-            "ollama_reply": reply_text.strip(),
-            "model_url": OLLAMA_URL
-        })
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    return jsonify({"status": "ok", "message": "Server is alive"})
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -46,6 +25,7 @@ def chat():
     user_input = data.get("message", "")
 
     try:
+        # Forward request to Ollama
         res = requests.post(
             f"{OLLAMA_URL}/api/generate",
             json={"model": OLLAMA_MODEL, "prompt": user_input},
