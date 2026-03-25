@@ -10,9 +10,8 @@
             background: #fff8f0; 
             text-align: center;
         }
-        h1 {
-            margin-bottom: 15px;
-        }
+        h1 { margin-bottom: 15px; }
+
         #chat-box { 
             border: 6px solid #ff8c00; 
             border-radius: 50%; 
@@ -26,7 +25,6 @@
             position: relative;
         }
 
-        /* Glossy highlight */
         .glossy {
             position: absolute;
             top: 15%; left: 20%;
@@ -37,52 +35,10 @@
             pointer-events: none;
         }
 
-        .user { 
-            background: #ff7043; 
-            color: #fff; 
-            padding: 8px 12px; 
-            border-radius: 12px; 
-            margin: 6px 0; 
-            text-align: right; 
-            font-size: 14px;
-        }
-        .ai { 
-            background: transparent; 
-            color: #222; 
-            padding: 8px 12px; 
-            margin: 6px 0; 
-            text-align: left; 
-            font-size: 14px;
-            font-weight: 500;
-        }
-        .typing { 
-            font-style: italic; 
-            color: #ff8c00; 
-            margin: 6px 0; 
-            text-align: left; 
-        }
+        .user { background: #ff7043; color: #fff; padding: 8px 12px; border-radius: 12px; margin: 6px 0; text-align: right; font-size: 14px; }
+        .ai { background: transparent; color: #222; padding: 8px 12px; margin: 6px 0; text-align: left; font-size: 14px; font-weight: 500; }
+        .typing { font-style: italic; color: #ff8c00; margin: 6px 0; text-align: left; }
 
-        /* Code block styling (outside orange, clean) */
-        pre {
-            background: #2d2d2d;
-            color: #f8f8f2;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-family: Consolas, monospace;
-            text-align: left;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            line-height: 1.4;
-            max-width: 420px;
-            margin: 15px auto;
-        }
-        .keyword { color: #ff79c6; }
-        .string { color: #f1fa8c; }
-        .comment { color: #6272a4; font-style: italic; }
-        .function { color: #50fa7b; }
-
-        /* Input bar always below orange */
         #input-box { 
             margin-top: 15px; 
             display: flex; 
@@ -91,32 +47,75 @@
             margin-left: auto; 
             margin-right: auto; 
         }
-        #message { 
-            flex: 1; 
-            padding: 8px; 
-            border-radius: 8px; 
-            border: 1px solid #ccc; 
-            font-size: 14px;
+        #message { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; }
+        button { padding: 8px 14px; background: #ff8c00; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #e67e22; }
+
+        /* Code panel overlay */
+        #code-panel {
+            position: fixed;
+            top: 0;
+            left: -500px; /* hidden off-screen */
+            width: 400px;
+            height: 100%;
+            background: #2d2d2d;
+            color: #f8f8f2;
+            box-shadow: 4px 0 12px rgba(0,0,0,0.3);
+            padding: 20px;
+            overflow-y: auto;
+            transition: all 0.6s ease;
+            z-index: 999;
         }
-        button { 
-            padding: 8px 14px; 
-            background: #ff8c00; 
-            color: #fff; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
+        #code-panel.show {
+            left: 0; /* slide in */
+        }
+        #close-btn {
+            background: #ff8c00;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
             font-weight: bold;
+            margin-bottom: 10px;
         }
-        button:hover { 
-            background: #e67e22; 
+        #close-btn:hover { background: #e67e22; }
+
+        pre {
+            background: #1e1e1e;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: Consolas, monospace;
+            text-align: left;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.4;
         }
+        .keyword { color: #ff79c6; }
+        .string { color: #f1fa8c; }
+        .comment { color: #6272a4; font-style: italic; }
+        .function { color: #50fa7b; }
     </style>
 </head>
 <body>
     <h1>🍊 Orange Chat Board</h1>
 
-    <!-- Code block ABOVE the orange -->
-    <pre>
+    <!-- Orange chat bubble -->
+    <div id="chat-box">
+        <div class="glossy"></div>
+    </div>
+
+    <!-- Input bar neatly below -->
+    <div id="input-box">
+        <input type="text" id="message" placeholder="Type your message..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <!-- Code panel overlay -->
+    <div id="code-panel">
+        <button id="close-btn" onclick="closeCode()">Close ✖</button>
+        <pre>
 <span class="comment"># Initialize an empty list</span>
 <span class="keyword">my_list</span> = []
 
@@ -139,17 +138,7 @@
 
 <span class="comment"># Print the final list</span>
 <span class="function">print</span>(<span class="string">"Final List:"</span>, <span class="keyword">my_list</span>)
-    </pre>
-
-    <!-- Orange chat bubble -->
-    <div id="chat-box">
-        <div class="glossy"></div>
-    </div>
-
-    <!-- Input bar neatly below -->
-    <div id="input-box">
-        <input type="text" id="message" placeholder="Type your message..." />
-        <button onclick="sendMessage()">Send</button>
+        </pre>
     </div>
 
     <script>
@@ -197,6 +186,11 @@
                 chatBox.appendChild(aiBubble);
 
                 chatBox.scrollTop = chatBox.scrollHeight;
+
+                // If user asked for code, show code panel
+                if (msg.toLowerCase().includes("code")) {
+                    document.getElementById("code-panel").classList.add("show");
+                }
             } catch (err) {
                 chatBox.removeChild(typingBubble);
                 const errorBubble = document.createElement("div");
@@ -205,6 +199,10 @@
                 errorBubble.innerHTML = "⚠️ Error: " + err.message;
                 chatBox.appendChild(errorBubble);
             }
+        }
+
+        function closeCode() {
+            document.getElementById("code-panel").classList.remove("show");
         }
     </script>
 </body>
