@@ -1,42 +1,67 @@
-from flask import Flask, request, jsonify
-import requests
-import json
 import os
+import json
+import requests
+from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static", template_folder="templates")
+CORS(app)
 
-# Ollama exposed via ngrok
-OLLAMA_URL = "https://nonsuppressed-glottal-tonette.ngrok-free.dev/api/generate"
+# Configuration
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
+OLLAMA_MODEL = "mistral:latest"
 
-@app.route("/", methods=["POST"])
-def root_chat():
-    user_message = request.json.get("message", "")
-    payload = {
-        "model": "mistral:latest",
-        "prompt": user_message,
-        "stream": True
-    }
+@app.route("/")
+def home():
+    return render_template("index.html")
 
-    reply_text = ""
+@app.route("/ping", methods=["GET"])
+def ping():
     try:
-        # Forward request to ngrok Ollama endpoint
-        res = requests.post(OLLAMA_URL, json=payload, stream=True)
+        res = requests.post(
+            f"{OLLAMA_URL}/api/generate",
+            json={"model": OLLAMA_MODEL, "prompt": "ping"},
+            stream=True
+        )
+        reply_text = ""
         for line in res.iter_lines():
             if line:
-                data = json.loads(line.decode("utf-8"))
-                if "response" in data:
-                    reply_text += data["response"]
-                if data.get("done", False):
-                    break
+                try:
+                    j = json.loads(line.decode("utf-8"))
+                    if "response" in j:
+                        reply_text += j["response"]
+                except:
+                    pass
+        return jsonify({"status": "ok", "ollama_reply": reply_text.strip(), "model_url": OLLAMA_URL})
     except Exception as e:
-        return jsonify({"response": f"Error: {str(e)}"})
+        return jsonify({"status": "error", "message": str(e)}), 500
 
-    return jsonify({
-        "model_url": OLLAMA_URL,
-        "response": reply_text
-    })
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.get_json(force=True)
+    user_input = data.get("message", "")
+
+    try:
+        res = requests.post(
+            f"{OLLAMA_URL}/api/generate",
+            json={"model": OLLAMA_MODEL, "prompt": user_input},
+            stream=True
+        )
+
+        reply_text = ""
+        for line in res.iter_lines():
+            if line:
+                try:
+                    j = json.loads(line.decode("utf-8"))
+                    if "response" in j:
+                        reply_text += j["response"]
+                except:
+                    pass
+
+        return jsonify({"response": reply_text.strip(), "model_url": OLLAMA_URL})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    # Railway sets PORT automatically
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
