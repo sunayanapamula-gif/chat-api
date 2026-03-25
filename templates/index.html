@@ -129,7 +129,8 @@
         <button id="normal-btn" onclick="backToNormal()">Back to Normal</button>
         <pre id="code-content"></pre>
     </div>
-        <script>
+
+    <script>
         const msgInput = document.getElementById("message");
         const chatBox = document.getElementById("chat-box");
 
@@ -152,13 +153,13 @@
             typingBubble.className = "typing";
             typingBubble.innerHTML = "🤖 AI is thinking...";
             chatBox.appendChild(typingBubble);
-                        chatBox.scrollTop = chatBox.scrollHeight;
+            chatBox.scrollTop = chatBox.scrollHeight;
 
             // Call Flask backend
             fetch("/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: msg })
+                                body: JSON.stringify({ message: msg })
             })
             .then(res => res.json())
             .then(data => {
