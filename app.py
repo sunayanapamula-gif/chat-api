@@ -5,7 +5,7 @@ import json
 app = Flask(__name__)
 
 # Point directly to your local Ollama server
-OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_URL = "http://localhost:8080/api/generate"
 
 @app.route("/chat", methods=["POST"])
 def chat():
