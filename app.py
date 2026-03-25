@@ -8,12 +8,11 @@ app = Flask(__name__, static_folder="static", template_folder="templates")
 CORS(app)
 
 # Configuration
-OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")  # Ollama default
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral:latest")      # configurable model
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:8080")   # Ollama on port 8080
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral:latest")      # default model
 
 @app.route("/")
 def home():
-    # Serve index.html from templates folder
     return render_template("index.html")
 
 @app.route("/ping", methods=["GET"])
@@ -26,7 +25,6 @@ def chat():
     user_input = data.get("message", "")
 
     try:
-        # Forward request to Ollama
         res = requests.post(
             f"{OLLAMA_URL}/api/generate",
             json={"model": OLLAMA_MODEL, "prompt": user_input},
