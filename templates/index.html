@@ -20,7 +20,6 @@
             overflow-y: auto; 
             color: #333;
             position: relative;
-            clip-path: circle(50% at 50% 50%);
         }
 
         /* Glossy highlight */
@@ -59,33 +58,59 @@
             text-align: left; 
         }
 
-        /* Tilted curved code styling */
+        /* Code block styling (flat, clean) */
         pre {
-            background: rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.25);
             color: #f8f8f2;
-            padding: 14px;
-            border-radius: 50%;
+            padding: 12px;
+            border-radius: 12px; /* rounded rectangle */
             font-size: 13px;
             font-family: Consolas, monospace;
             text-align: left;
             white-space: pre-wrap;
             word-wrap: break-word;
             line-height: 1.4;
-            transform: rotate(-5deg); /* gentle tilt */
-            margin: auto;
-            width: 90%;
         }
         .keyword { color: #ff79c6; }
         .string { color: #f1fa8c; }
         .comment { color: #6272a4; font-style: italic; }
         .function { color: #50fa7b; }
+
+        /* Input bar always below orange */
+        #input-box { 
+            margin-top: 15px; 
+            display: flex; 
+            gap: 8px; 
+            max-width: 420px; 
+            margin-left: auto; 
+            margin-right: auto; 
+        }
+        #message { 
+            flex: 1; 
+            padding: 8px; 
+            border-radius: 8px; 
+            border: 1px solid #ccc; 
+            font-size: 14px;
+        }
+        button { 
+            padding: 8px 14px; 
+            background: #ff8c00; 
+            color: #fff; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold;
+        }
+        button:hover { 
+            background: #e67e22; 
+        }
     </style>
 </head>
 <body>
     <h1 style="text-align:center;">🍊 Orange Chat Board</h1>
     <div id="chat-box">
         <div class="glossy"></div>
-        <!-- Example AI response with tilted Python code -->
+        <!-- Example AI response with clean Python code -->
         <div class="ai">
             🍊 Sure! Here is a simple Python example:<br><br>
             <pre>
