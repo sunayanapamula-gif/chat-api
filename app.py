@@ -4,7 +4,7 @@
     <title>🍊 Orange Chat Board</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: linear-gradient(to bottom, #e0f7fa, #ffffff); text-align: center; transition: background 0.5s ease; }
+        body { font-family: Arial, sans-serif; margin: 20px; background: #fff8f0; text-align: center; }
         h1 { margin-bottom: 15px; }
 
         #chat-box { 
@@ -13,13 +13,10 @@
             width: 420px; height: 420px; margin: auto; padding: 20px; 
             overflow-y: auto; color: #333; position: relative;
             box-shadow: 0 0 30px rgba(255,140,0,0.6), inset 0 0 20px rgba(255,255,255,0.4);
-            transition: background 0.5s ease, box-shadow 0.5s ease;
         }
 
-        .glossy { position: absolute; top: 10%; left: 15%; width: 60%; height: 30%; background: radial-gradient(circle at top left, rgba(255,255,255,0.8), transparent 70%); border-radius: 50%; opacity: 0.7; pointer-events: none; }
-
-        .user { background: #ff7043; color: #fff; padding: 8px 12px; border-radius: 16px; margin: 8px auto; text-align: right; font-size: 14px; display: block; max-width: 80%; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
-        .ai { background: #fff3e0; color: #222; padding: 8px 12px; border-radius: 16px; margin: 8px auto; text-align: left; font-size: 14px; display: block; max-width: 80%; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+        .user { background: #ff7043; color: #fff; padding: 8px 12px; border-radius: 16px; margin: 8px auto; text-align: right; font-size: 14px; display: block; max-width: 80%; }
+        .ai { background: #fff3e0; color: #222; padding: 8px 12px; border-radius: 16px; margin: 8px auto; text-align: left; font-size: 14px; display: block; max-width: 80%; }
         .typing { font-style: italic; color: #ff8c00; margin: 6px auto; text-align: left; display: block; }
 
         #input-box { margin-top: 15px; display: flex; gap: 8px; max-width: 420px; margin-left: auto; margin-right: auto; }
@@ -37,7 +34,7 @@
 </head>
 <body>
     <h1>🍊 Orange Chat Board</h1>
-    <div id="chat-box"><div class="glossy"></div></div>
+    <div id="chat-box"></div>
     <div id="input-box">
         <input type="text" id="message" placeholder="Type your message..." />
         <button onclick="sendMessage()">Send</button>
@@ -94,7 +91,6 @@
                 chatBox.appendChild(aiBubble);
                 chatBox.scrollTop = chatBox.scrollHeight;
 
-                // If the reply looks like code, also show in code panel
                 if (msg.toLowerCase().includes("code")) {
                     showCodePanel(data.response);
                 }
