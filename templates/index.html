@@ -204,4 +204,18 @@
 
         function clearAppear() {
             const codePanel = document.getElementById("code-panel");
-            codePanel
+            codePanel.style.opacity = "0";
+            setTimeout(() => {
+                codePanel.style.opacity = "1";
+            }, 600);
+        }
+
+        function backToNormal() {
+            const codePanel = document.getElementById("code-panel");
+            const codeContent = document.getElementById("code-content");
+            codeContent.innerHTML = ""; // clear code
+            codePanel.classList.remove("show"); // hide panel
+        }
+    </script>
+</body>
+</html>
