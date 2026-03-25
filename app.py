@@ -5,7 +5,7 @@ import os
 
 app = Flask(__name__)
 
-# Point to your ngrok-exposed Ollama server
+# Ollama exposed via ngrok
 OLLAMA_URL = "https://nonsuppressed-glottal-tonette.ngrok-free.dev/api/generate"
 
 @app.route("/", methods=["POST"])
@@ -19,6 +19,7 @@ def root_chat():
 
     reply_text = ""
     try:
+        # Forward request to ngrok Ollama endpoint
         res = requests.post(OLLAMA_URL, json=payload, stream=True)
         for line in res.iter_lines():
             if line:
@@ -36,5 +37,6 @@ def root_chat():
     })
 
 if __name__ == "__main__":
+    # Railway sets PORT automatically
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
