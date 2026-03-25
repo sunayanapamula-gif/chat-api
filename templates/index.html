@@ -85,18 +85,27 @@
         body.dark .ai { background: #333; color: #fff; }
         body.dark .user { background: #ff5722; }
 
-        /* Stars (color will be set dynamically) */
+        /* Stars shimmer with rainbow glow */
         .star {
             position: absolute;
-            width: 4px; height: 4px;
             border-radius: 50%;
-            animation: twinkle 3s infinite ease-in-out;
+            animation: twinkle 3s infinite ease-in-out, rainbowGlow 6s infinite linear;
             pointer-events: none;
         }
+
         @keyframes twinkle {
             0% { transform: scale(0.5); opacity: 0.3; }
             50% { transform: scale(1.4); opacity: 1; }
             100% { transform: scale(0.5); opacity: 0.3; }
+        }
+
+        @keyframes rainbowGlow {
+            0%   { background: radial-gradient(circle, red 60%, transparent 100%); box-shadow: 0 0 6px red, 0 0 12px red; }
+            20%  { background: radial-gradient(circle, orange 60%, transparent 100%); box-shadow: 0 0 6px orange, 0 0 12px orange; }
+            40%  { background: radial-gradient(circle, yellow 60%, transparent 100%); box-shadow: 0 0 6px yellow, 0 0 12px yellow; }
+            60%  { background: radial-gradient(circle, green 60%, transparent 100%); box-shadow: 0 0 6px green, 0 0 12px green; }
+            80%  { background: radial-gradient(circle, blue 60%, transparent 100%); box-shadow: 0 0 6px blue, 0 0 12px blue; }
+            100% { background: radial-gradient(circle, violet 60%, transparent 100%); box-shadow: 0 0 6px violet, 0 0 12px violet; }
         }
     </style>
 </head>
@@ -150,7 +159,7 @@
                     ? "🍊 Generating your code..." 
                     : "🍊 Got your message!";
                 chatBox.appendChild(aiBubble);
-                chatBox.scrollTop = chatBox.scrollHeight;
+                                chatBox.scrollTop = chatBox.scrollHeight;
 
                 if (msg.toLowerCase().includes("code")) {
                     generateCode(msg);
@@ -209,7 +218,7 @@ print("Final List:", my_list)
             codePanel.style.opacity = "0"; 
         }
 
-        // Dark theme toggle with glowing rainbow stars
+        // Dark theme toggle with rainbow glowing stars
         function toggleTheme() {
             document.body.classList.toggle("dark");
             document.querySelectorAll(".star").forEach(s => s.remove());
