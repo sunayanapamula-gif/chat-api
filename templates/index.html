@@ -7,12 +7,12 @@
         body { 
             font-family: Arial, sans-serif; 
             margin: 20px; 
-            background: linear-gradient(to bottom, #e0f7fa, #ffffff); /* watery background */
+            background: linear-gradient(to bottom, #e0f7fa, #ffffff); 
             text-align: center;
+            transition: background 0.5s ease;
         }
         h1 { margin-bottom: 15px; }
 
-        /* Orange circle with watery effect */
         #chat-box { 
             border: 8px solid #ff8c00; 
             border-radius: 50%; 
@@ -20,9 +20,9 @@
             width: 420px; height: 420px; margin: auto; padding: 20px; 
             overflow-y: auto; color: #333; position: relative;
             box-shadow: 0 0 30px rgba(255,140,0,0.6), inset 0 0 20px rgba(255,255,255,0.4);
+            transition: background 0.5s ease, box-shadow 0.5s ease;
         }
 
-        /* Glossy highlight like water reflection */
         .glossy {
             position: absolute;
             top: 10%; left: 15%;
@@ -33,53 +33,31 @@
             pointer-events: none;
         }
 
-        /* Bubbles floating effect */
-        #chat-box::after {
-            content: "";
-            position: absolute;
-            bottom: 10px; right: 20px;
-            width: 12px; height: 12px;
-            background: rgba(255,255,255,0.7);
-            border-radius: 50%;
-            box-shadow: 0 -30px 0 rgba(255,255,255,0.5),
-                        -20px -60px 0 rgba(255,255,255,0.4),
-                        25px -90px 0 rgba(255,255,255,0.3);
-        }
-
-        /* Message bubbles */
         .user { 
-            background: #ff7043; 
-            color: #fff; 
-            padding: 8px 12px; 
-            border-radius: 16px; 
-            margin: 6px 0; 
-            text-align: right; 
-            font-size: 14px; 
-            display: inline-block; 
-            max-width: 80%;
+            background: #ff7043; color: #fff; padding: 8px 12px; 
+            border-radius: 16px; margin: 8px auto; text-align: right; 
+            font-size: 14px; display: block; max-width: 80%;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
         .ai { 
-            background: #fff3e0; 
-            color: #222; 
-            padding: 8px 12px; 
-            border-radius: 16px; 
-            margin: 6px 0; 
-            text-align: left; 
-            font-size: 14px; 
-            display: inline-block; 
-            max-width: 80%;
+            background: #fff3e0; color: #222; padding: 8px 12px; 
+            border-radius: 16px; margin: 8px auto; text-align: left; 
+            font-size: 14px; display: block; max-width: 80%;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
-        .typing { font-style: italic; color: #ff8c00; margin: 6px 0; text-align: left; }
+        .typing { font-style: italic; color: #ff8c00; margin: 6px auto; text-align: left; display: block; }
 
-        /* Input bar */
         #input-box { margin-top: 15px; display: flex; gap: 8px; max-width: 420px; margin-left: auto; margin-right: auto; }
         #message { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; }
         button { padding: 8px 14px; background: #ff8c00; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         button:hover { background: #e67e22; }
 
-        /* Code panel overlay */
+        #theme-btn {
+            margin-top: 15px;
+            background: #333;
+            color: #fff;
+        }
+
         #code-panel {
             position: fixed; top: 0; left: -500px; width: 400px; height: 100%;
             background: #2d2d2d; color: #f8f8f2; box-shadow: 4px 0 12px rgba(0,0,0,0.3);
@@ -94,17 +72,60 @@
 
         pre { background: #1e1e1e; padding: 12px; border-radius: 8px; font-size: 13px;
             font-family: Consolas, monospace; text-align: left; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4; }
+
+        /* Dark theme styles */
+        body.dark {
+            background: #121212;
+            color: #eee;
+        }
+        body.dark #chat-box {
+            background: radial-gradient(circle at center, #222 55%, #444 100%);
+            box-shadow: 0 0 40px rgba(255,215,0,0.4), inset 0 0 20px rgba(255,215,0,0.2);
+        }
+        body.dark .ai { background: #333; color: #ffd700; }
+        body.dark .user { background: #ff5722; }
+
+        /* Golden star sparkles */
+        .sparkle {
+            position: absolute;
+            width: 8px; height: 8px;
+            background: radial-gradient(circle, #ffd700 40%, transparent 70%);
+            border-radius: 50%;
+            animation: sparkle 2s infinite ease-in-out;
+            pointer-events: none;
+        }
+        @keyframes sparkle {
+            0% { transform: scale(0.5); opacity: 0.6; }
+            50% { transform: scale(1.4); opacity: 1; }
+            100% { transform: scale(0.5); opacity: 0.6; }
+        }
+
+        /* Tiny glowing dots */
+        .tiny-dot {
+            position: absolute;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff 40%, transparent 70%);
+            box-shadow: 0 0 6px #fff, 0 0 12px #ffd700;
+            animation: drift 4s infinite ease-in-out alternate;
+            pointer-events: none;
+        }
+        @keyframes drift {
+            from { transform: translate(0,0); opacity: 0.7; }
+            to   { transform: translate(8px,-8px); opacity: 1; }
+        }
     </style>
 </head>
 <body>
     <h1>🍊 Orange Chat Board</h1>
+    <button id="theme-btn" onclick="toggleTheme()">Toggle Dark Theme</button>
     <div id="chat-box"><div class="glossy"></div></div>
     <div id="input-box">
         <input type="text" id="message" placeholder="Type your message..." />
         <button onclick="sendMessage()">Send</button>
     </div>
 
-    <!-- Code panel overlay -->
+    <!-- Code Panel -->
     <div id="code-panel">
         <button id="close-btn" onclick="closeCode()">Close ✖</button>
         <button id="clear-btn" onclick="clearAppear()">Clear Appear</button>
@@ -114,21 +135,16 @@
 
     <script>
         const msgInput = document.getElementById("message");
+        const chatBox = document.getElementById("chat-box");
 
         msgInput.addEventListener("keydown", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                sendMessage();
-            }
+            if (event.key === "Enter") { event.preventDefault(); sendMessage(); }
         });
 
         function sendMessage() {
             const msg = msgInput.value.trim();
             if (!msg) return;
 
-            const chatBox = document.getElementById("chat-box");
-
-            // User bubble
             const userBubble = document.createElement("div");
             userBubble.className = "user";
             userBubble.innerHTML = "😳 " + msg;
@@ -136,61 +152,51 @@
 
             msgInput.value = "";
 
-            // Typing indicator
             const typingBubble = document.createElement("div");
             typingBubble.className = "typing";
-            typingBubble.innerHTML = "🤖 AI is thinking...";
+            typingBubble.innerHTML = "🤖 AI is generating...";
             chatBox.appendChild(typingBubble);
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            setTimeout(() => {
+            // Call your AI backend
+            fetch("https://nonsuppressed-glottal-tonette.ngrok-free.dev/api/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: "llama3.2",
+                    prompt: msg
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
                 chatBox.removeChild(typingBubble);
 
-                // AI bubble
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
-                aiBubble.innerHTML = msg.toLowerCase().includes("code") 
-                    ? "🍊 Generating your code..." 
-                    : "🍊 Got your message!";
+                aiBubble.innerHTML = "🍊 " + (data.response || "No reply");
                 chatBox.appendChild(aiBubble);
                 chatBox.scrollTop = chatBox.scrollHeight;
 
-                // If user asked for code, show code panel
-                if (msg.toLowerCase().includes("code")) {
-                    generateCode(msg);
+                                if (data.response && data.response.includes("```")) {
+                    generateCode(data.response);
                 }
-            }, 800);
+            })
+            .catch(err => {
+                chatBox.removeChild(typingBubble);
+
+                const aiBubble = document.createElement("div");
+                aiBubble.className = "ai";
+                aiBubble.innerHTML = "⚠️ Error contacting AI: " + err.message;
+                chatBox.appendChild(aiBubble);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
         }
 
+        // Code panel functions
         function generateCode(userRequest) {
             const codePanel = document.getElementById("code-panel");
             const codeContent = document.getElementById("code-content");
-
-            // Example: dynamically generate code based on request
-            if (userRequest.toLowerCase().includes("list")) {
-                codeContent.textContent = `
-# Initialize an empty list
-my_list = []
-
-# Add some elements
-my_list.append("apple")
-my_list.append("banana")
-my_list.append("cherry")
-
-print("Initial List:", my_list)
-
-# Modify an element
-my_list[1] = "blueberry"
-print("Updated List:", my_list)
-
-# Add a new element
-my_list.append("date")
-print("Final List:", my_list)
-                `;
-            } else {
-                codeContent.textContent = "# Example code for: " + userRequest;
-            }
-
+            codeContent.textContent = userRequest;
             codePanel.classList.add("show");
         }
 
@@ -206,12 +212,44 @@ print("Final List:", my_list)
             }, 600);
         }
 
-                function backToNormal() {
+        function backToNormal() {
             const codePanel = document.getElementById("code-panel");
             const codeContent = document.getElementById("code-content");
-            codeContent.textContent = ""; // clear code
-            codePanel.classList.remove("show"); // hide panel
-            codePanel.style.opacity = "0"; // reset fade
+            codeContent.textContent = ""; 
+            codePanel.classList.remove("show"); 
+            codePanel.style.opacity = "0"; 
+        }
+
+        // Function to add tiny dots
+        function addTinyDots() {
+            document.querySelectorAll(".tiny-dot").forEach(d => d.remove());
+            for (let i = 0; i < 20; i++) {
+                const dot = document.createElement("div");
+                dot.className = "tiny-dot";
+                dot.style.top = Math.random() * 380 + "px";
+                dot.style.left = Math.random() * 380 + "px";
+                dot.style.animationDelay = (Math.random() * 3) + "s";
+                document.getElementById("chat-box").appendChild(dot);
+            }
+        }
+
+        // Dark theme toggle with sparkles and tiny dots
+        function toggleTheme() {
+            document.body.classList.toggle("dark");
+
+            document.querySelectorAll(".sparkle").forEach(s => s.remove());
+
+            if (document.body.classList.contains("dark")) {
+                for (let i = 0; i < 12; i++) {
+                    const sparkle = document.createElement("div");
+                    sparkle.className = "sparkle";
+                    sparkle.style.top = Math.random() * 380 + "px";
+                    sparkle.style.left = Math.random() * 380 + "px";
+                    sparkle.style.animationDelay = (Math.random() * 2) + "s";
+                    document.getElementById("chat-box").appendChild(sparkle);
+                }
+                addTinyDots();
+            }
         }
     </script>
 </body>
