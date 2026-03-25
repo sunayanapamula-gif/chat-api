@@ -8,7 +8,7 @@ app = Flask(__name__, static_folder="static", template_folder="templates")
 CORS(app)
 
 # Configuration
-OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:8080")   # Ollama server
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")   # Ollama server
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral:latest")      # default model
 
 @app.route("/")
@@ -40,6 +40,8 @@ def chat():
                     j = json.loads(line.decode("utf-8"))
                     if "response" in j:
                         reply_text += j["response"]
+                    if j.get("done"):
+                        break
                 except Exception:
                     pass
 
