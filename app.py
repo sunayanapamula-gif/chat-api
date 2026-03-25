@@ -9,10 +9,11 @@ CORS(app)
 
 # Configuration
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")  # Ollama default
-OLLAMA_MODEL = "mistral:latest"
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral:latest")      # configurable model
 
 @app.route("/")
 def home():
+    # Serve index.html from templates folder
     return render_template("index.html")
 
 @app.route("/ping", methods=["GET"])
@@ -39,16 +40,17 @@ def chat():
                     j = json.loads(line.decode("utf-8"))
                     if "response" in j:
                         reply_text += j["response"]
-                except:
+                except Exception:
                     pass
 
         return jsonify({
             "response": reply_text.strip(),
-            "model_url": OLLAMA_URL
+            "model_url": OLLAMA_URL,
+            "model": OLLAMA_MODEL
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)
