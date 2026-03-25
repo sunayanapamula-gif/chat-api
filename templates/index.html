@@ -106,24 +106,25 @@
             color: #eee;
         }
         body.dark #chat-box {
-            background: radial-gradient(circle at center, #333 55%, #555 100%);
-            box-shadow: 0 0 40px rgba(255,255,255,0.3), inset 0 0 20px rgba(255,255,255,0.2);
+            background: radial-gradient(circle at center, #222 55%, #444 100%);
+            box-shadow: 0 0 40px rgba(255,215,0,0.4), inset 0 0 20px rgba(255,215,0,0.2);
         }
-        body.dark .ai { background: #333; color: #fff; }
+        body.dark .ai { background: #333; color: #ffd700; }
         body.dark .user { background: #ff5722; }
 
-        /* Sparkle animation inside orange */
+        /* Golden star sparkles */
         .sparkle {
             position: absolute;
-            width: 6px; height: 6px;
-            background: rgba(255,255,255,0.9);
+            width: 8px; height: 8px;
+            background: radial-gradient(circle, #ffd700 40%, transparent 70%);
             border-radius: 50%;
             animation: sparkle 2s infinite ease-in-out;
+            pointer-events: none;
         }
         @keyframes sparkle {
-            0% { transform: scale(0.5); opacity: 0.8; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(0.5); opacity: 0.8; }
+            0% { transform: scale(0.5); opacity: 0.6; }
+            50% { transform: scale(1.4); opacity: 1; }
+            100% { transform: scale(0.5); opacity: 0.6; }
         }
     </style>
 </head>
@@ -239,7 +240,7 @@ print("Final List:", my_list)
             codePanel.style.opacity = "0"; 
         }
 
-        // Dark theme toggle with sparkles
+        // Dark theme toggle with golden sparkles
         function toggleTheme() {
             document.body.classList.toggle("dark");
 
@@ -247,8 +248,8 @@ print("Final List:", my_list)
             document.querySelectorAll(".sparkle").forEach(s => s.remove());
 
             if (document.body.classList.contains("dark")) {
-                // Add sparkles inside orange
-                for (let i = 0; i < 10; i++) {
+                // Add golden sparkles inside orange
+                for (let i = 0; i < 12; i++) {
                     const sparkle = document.createElement("div");
                     sparkle.className = "sparkle";
                     sparkle.style.top = Math.random() * 380 + "px";
