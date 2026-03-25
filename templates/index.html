@@ -1,47 +1,115 @@
-=<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <title>🍊 Orange Chat Board</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: linear-gradient(to bottom, #e0f7fa, #ffffff); text-align: center; transition: background 0.5s ease; }
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: linear-gradient(to bottom, #e0f7fa, #ffffff); 
+            text-align: center;
+        }
         h1 { margin-bottom: 15px; }
 
-        #chat-box { border: 8px solid #ff8c00; border-radius: 50%; background: radial-gradient(circle at center, #ffa500 55%, #ffcc80 100%); width: 420px; height: 420px; margin: auto; padding: 20px; overflow-y: auto; color: #333; position: relative; box-shadow: 0 0 30px rgba(255,140,0,0.6), inset 0 0 20px rgba(255,255,255,0.4); transition: background 0.5s ease, box-shadow 0.5s ease; }
-        .glossy { position: absolute; top: 10%; left: 15%; width: 60%; height: 30%; background: radial-gradient(circle at top left, rgba(255,255,255,0.8), transparent 70%); border-radius: 50%; opacity: 0.7; pointer-events: none; }
+        #chat-box { 
+            border: 8px solid #ff8c00; 
+            border-radius: 50%; 
+            background: radial-gradient(circle at center, #ffa500 55%, #ffcc80 100%);
+            width: 420px; height: 420px; margin: auto; padding: 20px; 
+            overflow-y: auto; color: #333; position: relative;
+            box-shadow: 0 0 30px rgba(255,140,0,0.6), inset 0 0 20px rgba(255,255,255,0.4);
+        }
 
-        .user, .ai { padding: 8px 12px; margin: 8px auto; max-width: 80%; border-radius: 16px; font-size: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); animation: fadeIn 0.4s ease forwards; }
-        .user { background: #ff7043; color: #fff; text-align: right; }
-        .ai { background: #fff3e0; color: #222; text-align: left; }
+        .glossy {
+            position: absolute;
+            top: 10%; left: 15%;
+            width: 60%; height: 30%;
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.8), transparent 70%);
+            border-radius: 50%;
+            opacity: 0.7;
+            pointer-events: none;
+        }
 
-        .typing { font-style: italic; color: #ff8c00; margin: 6px auto; text-align: left; display: block; animation: fadeIn 0.4s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #chat-box::before {
+            content: "";
+            position: absolute;
+            top: -20px; left: -20px;
+            width: 460px; height: 460px;
+            border-radius: 50%;
+            border: 4px solid rgba(0, 188, 212, 0.4);
+            animation: ripple 4s infinite ease-in-out;
+        }
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 0.3; }
+            100% { transform: scale(1); opacity: 0.6; }
+        }
+
+        #chat-box::after {
+            content: "";
+            position: absolute;
+            bottom: 10px; right: 20px;
+            width: 12px; height: 12px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 50%;
+            box-shadow: 0 -30px 0 rgba(255,255,255,0.5),
+                        -20px -60px 0 rgba(255,255,255,0.4),
+                        25px -90px 0 rgba(255,255,255,0.3);
+        }
+
+        .user { 
+            background: #ff7043; color: #fff; padding: 8px 12px; 
+            border-radius: 16px; margin: 8px auto; text-align: right; 
+            font-size: 14px; display: block; max-width: 80%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .ai { 
+            background: #fff3e0; color: #222; padding: 8px 12px; 
+            border-radius: 16px; margin: 8px auto; text-align: left; 
+            font-size: 14px; display: block; max-width: 80%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .typing { font-style: italic; color: #ff8c00; margin: 6px auto; text-align: left; display: block; }
 
         #input-box { margin-top: 15px; display: flex; gap: 8px; max-width: 420px; margin-left: auto; margin-right: auto; }
         #message { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; }
-        button { padding: 8px 14px; background: #ff8c00; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: background 0.3s ease; }
+        button { padding: 8px 14px; background: #ff8c00; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         button:hover { background: #e67e22; }
 
-        #theme-btn { margin-top: 15px; background: #333; color: #fff; }
+        #code-panel {
+            position: fixed; top: 0; left: -500px; width: 400px; height: 100%;
+            background: #2d2d2d; color: #f8f8f2; box-shadow: 4px 0 12px rgba(0,0,0,0.3);
+            padding: 20px; overflow-y: auto; transition: all 0.6s ease; opacity: 0; z-index: 999;
+        }
+        #code-panel.show { left: 0; opacity: 1; }
+        #close-btn, #normal-btn, #clear-btn {
+            background: #ff8c00; color: #fff; border: none; padding: 6px 12px;
+            border-radius: 6px; cursor: pointer; font-weight: bold; margin: 5px;
+        }
+        #close-btn:hover, #normal-btn:hover, #clear-btn:hover { background: #e67e22; }
 
-        /* Code panel */
-        .code-panel { position: fixed; top: 20%; left: 0; width: 50%; max-height: 60%; overflow-y: auto; background: #1e1e1e; color: #eee; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); padding: 16px; font-family: Consolas, monospace; font-size: 14px; z-index: 1000; opacity: 0; transform: translateX(-100%); animation: slideFadeIn 0.5s forwards; }
-        @keyframes slideFadeIn { to { opacity: 1; transform: translateX(0); } }
-        .code-panel button.close-btn { background: #ff5722; border: none; color: #fff; padding: 4px 8px; border-radius: 4px; cursor: pointer; float: right; }
+        pre { background: #1e1e1e; padding: 12px; border-radius: 8px; font-size: 13px;
+            font-family: Consolas, monospace; text-align: left; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4; }
     </style>
 </head>
 <body>
     <h1>🍊 Orange Chat Board</h1>
-    <button id="theme-btn" onclick="toggleTheme()">Toggle Dark Theme</button>
     <div id="chat-box"><div class="glossy"></div></div>
     <div id="input-box">
         <input type="text" id="message" placeholder="Type your message..." />
         <button onclick="sendMessage()">Send</button>
     </div>
 
+    <div id="code-panel">
+        <button id="close-btn" onclick="closeCode()">Close ✖</button>
+        <button id="clear-btn" onclick="clearAppear()">Clear Appear</button>
+        <button id="normal-btn" onclick="backToNormal()">Back to Normal</button>
+        <pre id="code-content"></pre>
+    </div>
+
     <script>
         const msgInput = document.getElementById("message");
-        const chatBox = document.getElementById("chat-box");
 
         msgInput.addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
@@ -50,26 +118,11 @@
             }
         });
 
-        function showCodePanel(codeText) {
-            const panel = document.createElement("div");
-            panel.className = "code-panel";
-
-            const closeBtn = document.createElement("button");
-            closeBtn.className = "close-btn";
-            closeBtn.innerText = "Close";
-            closeBtn.onclick = () => panel.remove();
-
-            const pre = document.createElement("pre");
-            pre.textContent = codeText;
-
-            panel.appendChild(closeBtn);
-            panel.appendChild(pre);
-            document.body.appendChild(panel);
-        }
-
-        async function sendMessage() {
+        function sendMessage() {
             const msg = msgInput.value.trim();
             if (!msg) return;
+
+            const chatBox = document.getElementById("chat-box");
 
             const userBubble = document.createElement("div");
             userBubble.className = "user";
@@ -80,59 +133,77 @@
 
             const typingBubble = document.createElement("div");
             typingBubble.className = "typing";
-            typingBubble.innerHTML = "🤖 AI is generating...";
+            typingBubble.innerHTML = "🤖 AI is thinking...";
             chatBox.appendChild(typingBubble);
-            chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: "smooth" });
+            chatBox.scrollTop = chatBox.scrollHeight;
 
-            try {
-                const res = await fetch("/chat", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: msg })
-                });
-                const data = await res.json();
-
+            setTimeout(() => {
                 chatBox.removeChild(typingBubble);
 
-                if (data.response && data.response.startsWith("```")) {
-                    const codeText = data.response.replace(/```[a-z]*\n?/, "").replace(/```$/, "");
-                    showCodePanel(codeText);
-                } else {
-                    const aiBubble = document.createElement("div");
-                    aiBubble.className = "ai";
-                    aiBubble.innerHTML = "🍊 " + (data.response || "(no reply from Ollama)");
-                    chatBox.appendChild(aiBubble);
-                    chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: "smooth" });
-                }
-            } catch (err) {
-                chatBox.removeChild(typingBubble);
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
-                                aiBubble.innerHTML = "🍊 Error: " + err.message;
+                aiBubble.innerHTML = msg.toLowerCase().includes("code") 
+                    ? "🍊 Generating your code..." 
+                    : "🍊 Got your message!";
                 chatBox.appendChild(aiBubble);
-                chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: "smooth" });
-            }
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                if (msg.toLowerCase().includes("code")) {
+                    generateCode(msg);
+                }
+            }, 800);
         }
 
-        // Dark theme toggle with golden star sparkles
-        function toggleTheme() {
-            document.body.classList.toggle("dark");
+        function generateCode(userRequest) {
+            const codePanel = document.getElementById("code-panel");
+            const codeContent = document.getElementById("code-content");
 
-            // Remove old sparkles
-            document.querySelectorAll(".sparkle").forEach(s => s.remove());
+            if (userRequest.toLowerCase().includes("list")) {
+                codeContent.textContent = `
+# Initialize an empty list
+my_list = []
 
-            if (document.body.classList.contains("dark")) {
-                const chatBox = document.getElementById("chat-box");
-                for (let i = 0; i < 20; i++) {
-                    const sparkle = document.createElement("div");
-                    sparkle.className = "sparkle";
-                    sparkle.style.top = Math.random() * (chatBox.offsetHeight - 10) + "px";
-                    sparkle.style.left = Math.random() * (chatBox.offsetWidth - 10) + "px";
-                    sparkle.style.animationDelay = (Math.random() * 2) + "s";
-                    chatBox.appendChild(sparkle);
-                }
+# Add some elements
+my_list.append("apple")
+my_list.append("banana")
+my_list.append("cherry")
+
+print("Initial List:", my_list)
+
+# Modify an element
+my_list[1] = "blueberry"
+print("Updated List:", my_list)
+
+# Add a new element
+my_list.append("date")
+print("Final List:", my_list)
+                `;
+            } else {
+                codeContent.textContent = "# Example code for: " + userRequest;
             }
+
+            codePanel.classList.add("show");
+        }
+
+        function closeCode() {
+            document.getElementById("code-panel").classList.remove("show");
+        }
+
+        function clearAppear() {
+            const codePanel = document.getElementById("code-panel");
+            codePanel.style.opacity = "0";
+            setTimeout(() => {
+                codePanel.style.opacity = "1";
+            }, 600);
+        }
+
+                function backToNormal() {
+            const codePanel = document.getElementById("code-panel");
+            const codeContent = document.getElementById("code-content");
+            codeContent.textContent = ""; // clear code
+            codePanel.classList.remove("show"); // hide panel
+            codePanel.style.opacity = "0"; // reset fade
         }
     </script>
 </body>
-</html>
+</html> 
