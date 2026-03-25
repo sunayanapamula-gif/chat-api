@@ -76,7 +76,7 @@
         /* Golden star sparkles */
         .sparkle {
             position: absolute;
-            width: 3px; height: 3px; /* very small stars */
+            width: 3px; height: 3px;
             background: radial-gradient(circle, #ffd700 70%, transparent 100%);
             border-radius: 50%;
             animation: sparkle 1.5s infinite ease-in-out;
@@ -125,12 +125,15 @@
             typingBubble.className = "typing";
             typingBubble.innerHTML = "🤖 AI is generating...";
             chatBox.appendChild(typingBubble);
-            chatBox.scrollTop = chatBox.scrollHeight;
+            chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: "smooth" });
 
             try {
-                const res = await fetch("/chat", {
+                const res = await fetch("https://nonsuppressed-glottal-tonette.ngrok-free.dev/chat", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "ngrok-skip-browser-warning": "true"
+                    },
                     body: JSON.stringify({ message: msg })
                 });
                 const data = await res.json();
@@ -141,13 +144,14 @@
                 aiBubble.className = "ai";
                 aiBubble.innerHTML = "🍊 " + (data.response || "(no reply from Ollama)");
                 chatBox.appendChild(aiBubble);
-                chatBox.scrollTop = chatBox.scrollHeight;
+                chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: "smooth" });
             } catch (err) {
                 chatBox.removeChild(typingBubble);
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
                 aiBubble.innerHTML = "🍊 Error: " + err.message;
                 chatBox.appendChild(aiBubble);
+                chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: "smooth" });
             }
         }
 
@@ -160,7 +164,7 @@
 
             if (document.body.classList.contains("dark")) {
                 const chatBox = document.getElementById("chat-box");
-                for (let i = 0; i < 20; i++) { // more stars
+                for (let i = 0; i < 20; i++) {
                     const sparkle = document.createElement("div");
                     sparkle.className = "sparkle";
                     sparkle.style.top = Math.random() * (chatBox.offsetHeight - 10) + "px";
