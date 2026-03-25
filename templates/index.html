@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>🍊 Orange Chat Board + Fish</title>
+    <title>🍊 Orange Chat Board + Betta Fish</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; background: linear-gradient(to bottom, #e0f7fa, #ffffff); text-align: center; transition: background 0.5s ease; }
@@ -21,31 +21,11 @@
 
         #theme-btn { margin-top: 15px; background: #333; color: #fff; }
 
-        /* Fish styling */
-        #fish {
-            position: absolute;
-            width: 60px; height: 30px;
-            background: linear-gradient(90deg, #ff0000, #ff9900, #00ffcc, #0066ff, #cc00ff);
-            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-            box-shadow: 0 0 15px rgba(255,255,255,0.8), 0 0 25px rgba(255,255,255,0.6);
-            z-index: 20;
-            transition: left 2s ease, top 2s ease;
-            animation: swimTail 1s infinite ease-in-out;
-        }
-        #fish::after {
-            content: "";
-            position: absolute;
-            right: -15px; top: 5px;
-            width: 20px; height: 20px;
-            background: linear-gradient(90deg, #00ffcc, #0066ff, #cc00ff);
-            border-radius: 50%;
-        }
-
-        @keyframes swimTail {
-            0% { transform: rotate(0deg); }
-            50% { transform: rotate(10deg); }
-            100% { transform: rotate(0deg); }
-        }
+        /* Dark theme styles */
+        body.dark { background: #121212; color: #eee; }
+        body.dark #chat-box { background: radial-gradient(circle at center, #222 55%, #444 100%); box-shadow: 0 0 40px rgba(255,255,255,0.3), inset 0 0 20px rgba(255,255,255,0.2); }
+        body.dark .ai { background: #333; color: #fff; }
+        body.dark .user { background: #ff5722; }
 
         /* Stars shimmer with rainbow glow and drift */
         .star { position: absolute; border-radius: 50%; animation: twinkle 3s infinite ease-in-out, rainbowGlow 6s infinite linear, drift 10s infinite alternate ease-in-out; pointer-events: none; }
@@ -59,6 +39,24 @@
             100% { background: radial-gradient(circle, violet 60%, transparent 100%); box-shadow: 0 0 6px violet, 0 0 12px violet; }
         }
         @keyframes drift { from { transform: translate(0, 0); } to { transform: translate(20px, -20px); } }
+
+        /* Betta fish image */
+        #betta {
+            position: absolute;
+            width: 150px; 
+            height: auto;
+            top: 50%; 
+            left: calc(50% + 260px);
+            z-index: 30;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.8));
+            transition: left 2s ease, top 2s ease;
+            animation: swimTail 1s infinite ease-in-out;
+        }
+        @keyframes swimTail {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(5deg); }
+            100% { transform: rotate(0deg); }
+        }
     </style>
 </head>
 <body>
@@ -70,12 +68,13 @@
         <button onclick="sendMessage()">Send</button>
     </div>
 
-    <div id="fish"></div>
+    <!-- Real Betta Fish Image -->
+    <img id="betta" src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Betta_fish.jpg" alt="Betta Fish">
 
     <script>
         const msgInput = document.getElementById("message");
         const chatBox = document.getElementById("chat-box");
-        const fish = document.getElementById("fish");
+        const betta = document.getElementById("betta");
 
         msgInput.addEventListener("keydown", function(event) {
             if (event.key === "Enter") { event.preventDefault(); sendMessage(); }
@@ -111,35 +110,35 @@
             }, 800);
         }
 
-        // Random fish movement
-        function moveFishRandomly() {
-            const screenWidth = window.innerWidth - 80;
-            const screenHeight = window.innerHeight - 80;
+        // Random betta fish movement
+        function moveBettaRandomly() {
+            const screenWidth = window.innerWidth - 150;
+            const screenHeight = window.innerHeight - 150;
             const newX = Math.random() * screenWidth;
             const newY = Math.random() * screenHeight;
-            fish.style.left = newX + "px";
-            fish.style.top = newY + "px";
+            betta.style.left = newX + "px";
+            betta.style.top = newY + "px";
         }
-        setInterval(moveFishRandomly, 3000);
+        setInterval(moveBettaRandomly, 4000);
 
-        // Escape mechanic when arrow keys are pressed
+                // Escape mechanic for betta when arrow keys are pressed
         document.addEventListener("keydown", function(event) {
-            const currentX = fish.offsetLeft;
-            const currentY = fish.offsetTop;
+            const currentX = betta.offsetLeft;
+            const currentY = betta.offsetTop;
             let escapeX = currentX;
             let escapeY = currentY;
 
-                        if (event.key === "ArrowUp") escapeY += 50;   // fish swims down
-            if (event.key === "ArrowDown") escapeY -= 50; // fish swims up
-            if (event.key === "ArrowLeft") escapeX += 50; // fish swims right
-            if (event.key === "ArrowRight") escapeX -= 50; // fish swims left
+            if (event.key === "ArrowUp") escapeY += 80;   // fish swims down
+            if (event.key === "ArrowDown") escapeY -= 80; // fish swims up
+            if (event.key === "ArrowLeft") escapeX += 80; // fish swims right
+            if (event.key === "ArrowRight") escapeX -= 80; // fish swims left
 
             // Keep fish inside screen bounds
-            escapeX = Math.max(0, Math.min(window.innerWidth - 80, escapeX));
-            escapeY = Math.max(0, Math.min(window.innerHeight - 80, escapeY));
+            escapeX = Math.max(0, Math.min(window.innerWidth - 150, escapeX));
+            escapeY = Math.max(0, Math.min(window.innerHeight - 150, escapeY));
 
-            fish.style.left = escapeX + "px";
-            fish.style.top = escapeY + "px";
+            betta.style.left = escapeX + "px";
+            betta.style.top = escapeY + "px";
         });
 
         // Dark theme toggle with rainbow glowing drifting stars
