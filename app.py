@@ -4,14 +4,14 @@ import json
 
 app = Flask(__name__)
 
-# Point directly to your local Ollama server
-OLLAMA_URL = "http://localhost:8080/api/generate"
+# Use your ngrok-exposed Ollama API
+OLLAMA_URL = "https://nonsuppressed-glottal-tonette.ngrok-free.dev/api/generate"
 
 @app.route("/chat", methods=["POST"])
 def chat():
     user_message = request.json.get("message", "")
     payload = {
-        "model": "mistral:latest",
+        "model": "mistral:latest",   # you can change to another model if needed
         "prompt": user_message,
         "stream": True
     }
@@ -29,4 +29,10 @@ def chat():
     except Exception as e:
         return jsonify({"response": f"Error: {str(e)}"})
 
-    return jsonify({"response": reply_text})
+    return jsonify({
+        "model_url": OLLAMA_URL,
+        "response": reply_text
+    })
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
