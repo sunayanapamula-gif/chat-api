@@ -43,10 +43,9 @@
             font-size: 14px;
         }
         .ai { 
-            background: #fff3e0; 
+            background: transparent; /* no box, blends into orange */
             color: #222; 
             padding: 8px 12px; 
-            border-radius: 12px; 
             margin: 6px 0; 
             text-align: left; 
             font-size: 14px;
@@ -59,15 +58,18 @@
             text-align: left; 
         }
 
-        /* Code block styling */
+        /* Curved code styling */
         pre {
-            background: #2d2d2d;
+            background: rgba(255,255,255,0.2); /* semi-transparent overlay */
             color: #f8f8f2;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 12px;
+            border-radius: 50%; /* curve with orange */
             overflow-x: auto;
             font-size: 13px;
             font-family: Consolas, monospace;
+            text-align: left;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
         .keyword { color: #ff79c6; }
         .string { color: #f1fa8c; }
@@ -79,7 +81,7 @@
     <h1 style="text-align:center;">🍊 Orange Chat Board</h1>
     <div id="chat-box">
         <div class="glossy"></div>
-        <!-- Example AI response with colored Python code -->
+        <!-- Example AI response with curved Python code -->
         <div class="ai">
             🍊 Sure! Here is a simple Python example:<br><br>
             <pre>
