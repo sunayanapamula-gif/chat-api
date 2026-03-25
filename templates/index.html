@@ -33,33 +33,6 @@
             pointer-events: none;
         }
 
-        #chat-box::before {
-            content: "";
-            position: absolute;
-            top: -20px; left: -20px;
-            width: 460px; height: 460px;
-            border-radius: 50%;
-            border: 4px solid rgba(0, 188, 212, 0.4);
-            animation: ripple 4s infinite ease-in-out;
-        }
-        @keyframes ripple {
-            0% { transform: scale(1); opacity: 0.6; }
-            50% { transform: scale(1.1); opacity: 0.3; }
-            100% { transform: scale(1); opacity: 0.6; }
-        }
-
-        #chat-box::after {
-            content: "";
-            position: absolute;
-            bottom: 10px; right: 20px;
-            width: 12px; height: 12px;
-            background: rgba(255,255,255,0.7);
-            border-radius: 50%;
-            box-shadow: 0 -30px 0 rgba(255,255,255,0.5),
-                        -20px -60px 0 rgba(255,255,255,0.4),
-                        25px -90px 0 rgba(255,255,255,0.3);
-        }
-
         .user { 
             background: #ff7043; color: #fff; padding: 8px 12px; 
             border-radius: 16px; margin: 8px auto; text-align: right; 
@@ -85,21 +58,6 @@
             color: #fff;
         }
 
-        #code-panel {
-            position: fixed; top: 0; left: -500px; width: 400px; height: 100%;
-            background: #2d2d2d; color: #f8f8f2; box-shadow: 4px 0 12px rgba(0,0,0,0.3);
-            padding: 20px; overflow-y: auto; transition: all 0.6s ease; opacity: 0; z-index: 999;
-        }
-        #code-panel.show { left: 0; opacity: 1; }
-        #close-btn, #normal-btn, #clear-btn {
-            background: #ff8c00; color: #fff; border: none; padding: 6px 12px;
-            border-radius: 6px; cursor: pointer; font-weight: bold; margin: 5px;
-        }
-        #close-btn:hover, #normal-btn:hover, #clear-btn:hover { background: #e67e22; }
-
-        pre { background: #1e1e1e; padding: 12px; border-radius: 8px; font-size: 13px;
-            font-family: Consolas, monospace; text-align: left; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4; }
-
         /* Dark theme styles */
         body.dark {
             background: #121212;
@@ -115,16 +73,16 @@
         /* Tiny glowing white stars */
         .star {
             position: absolute;
-            width: 4px; height: 4px;
-            background: radial-gradient(circle, #ffffff 40%, transparent 70%);
+            width: 3px; height: 3px; /* very small */
+            background: radial-gradient(circle, #ffffff 60%, transparent 100%);
             border-radius: 50%;
-            animation: twinkle 2s infinite ease-in-out;
+            animation: twinkle 3s infinite ease-in-out;
             pointer-events: none;
         }
         @keyframes twinkle {
-            0% { transform: scale(0.5); opacity: 0.4; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(0.5); opacity: 0.4; }
+            0% { transform: scale(0.5); opacity: 0.3; }
+            50% { transform: scale(1.4); opacity: 1; }
+            100% { transform: scale(0.5); opacity: 0.3; }
         }
     </style>
 </head>
@@ -137,35 +95,22 @@
         <button onclick="sendMessage()">Send</button>
     </div>
 
-    <div id="code-panel">
-        <button id="close-btn" onclick="closeCode()">Close ✖</button>
-        <button id="clear-btn" onclick="clearAppear()">Clear Appear</button>
-        <button id="normal-btn" onclick="backToNormal()">Back to Normal</button>
-        <pre id="code-content"></pre>
-    </div>
-
     <script>
         const msgInput = document.getElementById("message");
         const chatBox = document.getElementById("chat-box");
 
         msgInput.addEventListener("keydown", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                sendMessage();
-            }
+            if (event.key === "Enter") { event.preventDefault(); sendMessage(); }
         });
 
         function sendMessage() {
             const msg = msgInput.value.trim();
             if (!msg) return;
-
             const userBubble = document.createElement("div");
             userBubble.className = "user";
             userBubble.innerHTML = "😳 " + msg;
             chatBox.appendChild(userBubble);
-
             msgInput.value = "";
-
             const typingBubble = document.createElement("div");
             typingBubble.className = "typing";
             typingBubble.innerHTML = "🤖 AI is thinking...";
@@ -174,87 +119,24 @@
 
             setTimeout(() => {
                 chatBox.removeChild(typingBubble);
-
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
-                                aiBubble.innerHTML = msg.toLowerCase().includes("code") 
-                    ? "🍊 Generating your code..." 
-                    : "🍊 Got your message!";
+                aiBubble.innerHTML = "🍊 Got your message!";
                 chatBox.appendChild(aiBubble);
                 chatBox.scrollTop = chatBox.scrollHeight;
-
-                if (msg.toLowerCase().includes("code")) {
-                    generateCode(msg);
-                }
             }, 800);
         }
 
-        function generateCode(userRequest) {
-            const codePanel = document.getElementById("code-panel");
-            const codeContent = document.getElementById("code-content");
-
-            if (userRequest.toLowerCase().includes("list")) {
-                codeContent.textContent = `
-# Initialize an empty list
-my_list = []
-
-# Add some elements
-my_list.append("apple")
-my_list.append("banana")
-my_list.append("cherry")
-
-print("Initial List:", my_list)
-
-# Modify an element
-my_list[1] = "blueberry"
-print("Updated List:", my_list)
-
-# Add a new element
-my_list.append("date")
-print("Final List:", my_list)
-                `;
-            } else {
-                codeContent.textContent = "# Example code for: " + userRequest;
-            }
-
-            codePanel.classList.add("show");
-        }
-
-        function closeCode() {
-            document.getElementById("code-panel").classList.remove("show");
-        }
-
-        function clearAppear() {
-            const codePanel = document.getElementById("code-panel");
-            codePanel.style.opacity = "0";
-            setTimeout(() => {
-                codePanel.style.opacity = "1";
-            }, 600);
-        }
-
-        function backToNormal() {
-            const codePanel = document.getElementById("code-panel");
-            const codeContent = document.getElementById("code-content");
-            codeContent.textContent = ""; 
-            codePanel.classList.remove("show"); 
-            codePanel.style.opacity = "0"; 
-        }
-
-        // Dark theme toggle with tiny glowing stars
         function toggleTheme() {
             document.body.classList.toggle("dark");
-
-            // Remove old stars
             document.querySelectorAll(".star").forEach(s => s.remove());
-
             if (document.body.classList.contains("dark")) {
-                // Add tiny glowing white stars inside orange
-                for (let i = 0; i < 20; i++) {
+                for (let i = 0; i < 25; i++) {
                     const star = document.createElement("div");
                     star.className = "star";
                     star.style.top = Math.random() * 380 + "px";
                     star.style.left = Math.random() * 380 + "px";
-                    star.style.animationDelay = (Math.random() * 2) + "s";
+                    star.style.animationDelay = (Math.random() * 3) + "s";
                     document.getElementById("chat-box").appendChild(star);
                 }
             }
