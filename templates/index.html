@@ -80,37 +80,39 @@
         }
         body.dark #chat-box {
             background: radial-gradient(circle at center, #222 55%, #444 100%);
-            box-shadow: 0 0 40px rgba(255,255,255,0.3), inset 0 0 20px rgba(255,255,255,0.2);
+            box-shadow: 0 0 40px rgba(255,215,0,0.4), inset 0 0 20px rgba(255,215,0,0.2);
         }
-        body.dark .ai { background: #333; color: #fff; }
+        body.dark .ai { background: #333; color: #ffd700; }
         body.dark .user { background: #ff5722; }
 
-        /* Stars shimmer with rainbow glow and drift */
-        .star {
+        /* Golden star sparkles */
+        .sparkle {
             position: absolute;
+            width: 8px; height: 8px;
+            background: radial-gradient(circle, #ffd700 40%, transparent 70%);
             border-radius: 50%;
-            animation: twinkle 3s infinite ease-in-out, rainbowGlow 6s infinite linear, drift 10s infinite alternate ease-in-out;
+            animation: sparkle 2s infinite ease-in-out;
             pointer-events: none;
         }
-
-        @keyframes twinkle {
-            0% { transform: scale(0.5); opacity: 0.3; }
+        @keyframes sparkle {
+            0% { transform: scale(0.5); opacity: 0.6; }
             50% { transform: scale(1.4); opacity: 1; }
-            100% { transform: scale(0.5); opacity: 0.3; }
+            100% { transform: scale(0.5); opacity: 0.6; }
         }
 
-        @keyframes rainbowGlow {
-            0%   { background: radial-gradient(circle, red 60%, transparent 100%); box-shadow: 0 0 6px red, 0 0 12px red; }
-            20%  { background: radial-gradient(circle, orange 60%, transparent 100%); box-shadow: 0 0 6px orange, 0 0 12px orange; }
-            40%  { background: radial-gradient(circle, yellow 60%, transparent 100%); box-shadow: 0 0 6px yellow, 0 0 12px yellow; }
-            60%  { background: radial-gradient(circle, green 60%, transparent 100%); box-shadow: 0 0 6px green, 0 0 12px green; }
-            80%  { background: radial-gradient(circle, blue 60%, transparent 100%); box-shadow: 0 0 6px blue, 0 0 12px blue; }
-            100% { background: radial-gradient(circle, violet 60%, transparent 100%); box-shadow: 0 0 6px violet, 0 0 12px violet; }
+        /* Tiny glowing dots */
+        .tiny-dot {
+            position: absolute;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff 40%, transparent 70%);
+            box-shadow: 0 0 6px #fff, 0 0 12px #ffd700;
+            animation: drift 4s infinite ease-in-out alternate;
+            pointer-events: none;
         }
-
         @keyframes drift {
-            from { transform: translate(0, 0); }
-            to   { transform: translate(20px, -20px); }
+            from { transform: translate(0,0); opacity: 0.7; }
+            to   { transform: translate(8px,-8px); opacity: 1; }
         }
     </style>
 </head>
@@ -123,6 +125,7 @@
         <button onclick="sendMessage()">Send</button>
     </div>
 
+    <!-- Code Panel -->
     <div id="code-panel">
         <button id="close-btn" onclick="closeCode()">Close ✖</button>
         <button id="clear-btn" onclick="clearAppear()">Clear Appear</button>
@@ -151,55 +154,49 @@
 
             const typingBubble = document.createElement("div");
             typingBubble.className = "typing";
-            typingBubble.innerHTML = "🤖 AI is thinking...";
+            typingBubble.innerHTML = "🤖 AI is generating...";
             chatBox.appendChild(typingBubble);
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            setTimeout(() => {
+            // Call your AI backend
+            fetch("https://nonsuppressed-glottal-tonette.ngrok-free.dev/api/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: "llama3.2",
+                    prompt: msg
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
                 chatBox.removeChild(typingBubble);
 
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
-                                aiBubble.innerHTML = msg.toLowerCase().includes("code") 
-                    ? "🍊 Generating your code..." 
-                    : "🍊 Got your message!";
+                aiBubble.innerHTML = "🍊 " + (data.response || "No reply");
                 chatBox.appendChild(aiBubble);
                 chatBox.scrollTop = chatBox.scrollHeight;
 
-                if (msg.toLowerCase().includes("code")) {
-                    generateCode(msg);
+                if (data.response && data.response.includes("```")) {
+                                        generateCode(data.response);
                 }
-            }, 800);
+            })
+            .catch(err => {
+                chatBox.removeChild(typingBubble);
+
+                const aiBubble = document.createElement("div");
+                aiBubble.className = "ai";
+                aiBubble.innerHTML = "⚠️ Error contacting AI: " + err.message;
+                chatBox.appendChild(aiBubble);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
         }
 
+        // Code panel functions
         function generateCode(userRequest) {
             const codePanel = document.getElementById("code-panel");
             const codeContent = document.getElementById("code-content");
-
-            if (userRequest.toLowerCase().includes("list")) {
-                codeContent.textContent = `
-# Initialize an empty list
-my_list = []
-
-# Add some elements
-my_list.append("apple")
-my_list.append("banana")
-my_list.append("cherry")
-
-print("Initial List:", my_list)
-
-# Modify an element
-my_list[1] = "blueberry"
-print("Updated List:", my_list)
-
-# Add a new element
-my_list.append("date")
-print("Final List:", my_list)
-                `;
-            } else {
-                codeContent.textContent = "# Example code for: " + userRequest;
-            }
-
+            codeContent.textContent = userRequest;
             codePanel.classList.add("show");
         }
 
@@ -223,30 +220,38 @@ print("Final List:", my_list)
             codePanel.style.opacity = "0"; 
         }
 
-        // Dark theme toggle with rainbow glowing drifting stars
+        // Function to add tiny dots
+        function addTinyDots() {
+            document.querySelectorAll(".tiny-dot").forEach(d => d.remove());
+            for (let i = 0; i < 20; i++) {
+                const dot = document.createElement("div");
+                dot.className = "tiny-dot";
+                dot.style.top = Math.random() * 380 + "px";
+                dot.style.left = Math.random() * 380 + "px";
+                dot.style.animationDelay = (Math.random() * 3) + "s";
+                document.getElementById("chat-box").appendChild(dot);
+            }
+        }
+
+        // Dark theme toggle with sparkles and tiny dots
         function toggleTheme() {
             document.body.classList.toggle("dark");
-            document.querySelectorAll(".star").forEach(s => s.remove());
+
+            document.querySelectorAll(".sparkle").forEach(s => s.remove());
 
             if (document.body.classList.contains("dark")) {
-                for (let i = 0; i < 25; i++) {
-                    const star = document.createElement("div");
-                    star.className = "star";
-                    star.style.top = Math.random() * 380 + "px";
-                    star.style.left = Math.random() * 380 + "px";
-
-                    // Random size
-                    const size = (Math.random() * 3 + 2);
-                    star.style.width = size + "px";
-                    star.style.height = size + "px";
-
-                    // Random animation delay
-                    star.style.animationDelay = (Math.random() * 3) + "s";
-
-                    document.getElementById("chat-box").appendChild(star);
+                for (let i = 0; i < 12; i++) {
+                    const sparkle = document.createElement("div");
+                    sparkle.className = "sparkle";
+                    sparkle.style.top = Math.random() * 380 + "px";
+                    sparkle.style.left = Math.random() * 380 + "px";
+                    sparkle.style.animationDelay = (Math.random() * 2) + "s";
+                    document.getElementById("chat-box").appendChild(sparkle);
                 }
+                addTinyDots();
             }
         }
     </script>
 </body>
 </html>
+                   
