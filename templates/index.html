@@ -110,19 +110,19 @@
         /* Betta fish image */
         #betta {
             position: absolute;
-            width: 150px; 
+            width: 200px; 
             height: auto;
-            top: 50%; 
-            left: calc(50% + 260px);
+            top: 50px; 
+            left: 50px;
             z-index: 30;
-            filter: drop-shadow(0 0 10px rgba(255,255,255,0.8));
-            transition: left 2s ease, top 2s ease;
-            animation: swimTail 1s infinite ease-in-out;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+            transition: left 3s ease, top 3s ease;
+            animation: bob 3s infinite ease-in-out;
         }
-        @keyframes swimTail {
-            0% { transform: rotate(0deg); }
-            50% { transform: rotate(5deg); }
-            100% { transform: rotate(0deg); }
+        @keyframes bob {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+            100% { transform: translateY(0) rotate(0deg); }
         }
     </style>
 </head>
@@ -143,18 +143,21 @@
     </div>
 
     <!-- Real Betta Fish Image -->
-    <img id="betta" src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Betta_fish.jpg" alt="Betta Fish">
+    <img id="betta" src="chat-api/images/beta.png" alt="Betta Fish">
 
     <script>
         const msgInput = document.getElementById("message");
         const chatBox = document.getElementById("chat-box");
         const betta = document.getElementById("betta");
 
-        msgInput.addEventListener("keydown", function(event) {
-            if (event.key === "Enter") { event.preventDefault(); sendMessage(); }
+                msgInput.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") { 
+                event.preventDefault(); 
+                sendMessage(); 
+            }
         });
 
-                function sendMessage() {
+        function sendMessage() {
             const msg = msgInput.value.trim();
             if (!msg) return;
 
@@ -258,10 +261,11 @@ print("Final List:", my_list)
 
         // Random betta fish movement
         function moveBettaRandomly() {
-            const screenWidth = window.innerWidth - 150;
-            const screenHeight = window.innerHeight - 150;
+            const screenWidth = window.innerWidth - 220;
+            const screenHeight = window.innerHeight - 220;
             const newX = Math.random() * screenWidth;
             const newY = Math.random() * screenHeight;
+            betta.style.transition = "left 3s ease, top 3s ease";
             betta.style.left = newX + "px";
             betta.style.top = newY + "px";
         }
@@ -279,8 +283,8 @@ print("Final List:", my_list)
             if (event.key === "ArrowLeft") escapeX += 80;
             if (event.key === "ArrowRight") escapeX -= 80;
 
-            escapeX = Math.max(0, Math.min(window.innerWidth - 150, escapeX));
-            escapeY = Math.max(0, Math.min(window.innerHeight - 150, escapeY));
+            escapeX = Math.max(0, Math.min(window.innerWidth - 220, escapeX));
+            escapeY = Math.max(0, Math.min(window.innerHeight - 220, escapeY));
 
             betta.style.left = escapeX + "px";
             betta.style.top = escapeY + "px";
