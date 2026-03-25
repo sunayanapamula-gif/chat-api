@@ -4,111 +4,47 @@
     <title>🍊 Orange Chat Board</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 20px; 
-            background: #fff8f0; 
-            text-align: center;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; background: #fff8f0; text-align: center; }
         h1 { margin-bottom: 15px; }
 
         #chat-box { 
-            border: 6px solid #ff8c00; 
-            border-radius: 50%; 
+            border: 6px solid #ff8c00; border-radius: 50%; 
             background: radial-gradient(circle at center, #ffa500 60%, #ffcc80 100%);
-            width: 420px; 
-            height: 420px; 
-            margin: auto; 
-            padding: 20px; 
-            overflow-y: auto; 
-            color: #333;
-            position: relative;
+            width: 420px; height: 420px; margin: auto; padding: 20px; 
+            overflow-y: auto; color: #333; position: relative;
         }
-
-        .glossy {
-            position: absolute;
-            top: 15%; left: 20%;
-            width: 50%; height: 25%;
+        .glossy { position: absolute; top: 15%; left: 20%; width: 50%; height: 25%;
             background: radial-gradient(circle at top left, rgba(255,255,255,0.7), transparent 70%);
-            border-radius: 50%;
-            opacity: 0.7;
-            pointer-events: none;
-        }
-
+            border-radius: 50%; opacity: 0.7; pointer-events: none; }
         .user { background: #ff7043; color: #fff; padding: 8px 12px; border-radius: 12px; margin: 6px 0; text-align: right; font-size: 14px; }
         .ai { background: transparent; color: #222; padding: 8px 12px; margin: 6px 0; text-align: left; font-size: 14px; font-weight: 500; }
         .typing { font-style: italic; color: #ff8c00; margin: 6px 0; text-align: left; }
 
-        #input-box { 
-            margin-top: 15px; 
-            display: flex; 
-            gap: 8px; 
-            max-width: 420px; 
-            margin-left: auto; 
-            margin-right: auto; 
-        }
+        #input-box { margin-top: 15px; display: flex; gap: 8px; max-width: 420px; margin-left: auto; margin-right: auto; }
         #message { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; }
         button { padding: 8px 14px; background: #ff8c00; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         button:hover { background: #e67e22; }
 
         /* Code panel overlay */
         #code-panel {
-            position: fixed;
-            top: 0;
-            left: -500px; /* hidden off-screen */
-            width: 400px;
-            height: 100%;
-            background: #2d2d2d;
-            color: #f8f8f2;
-            box-shadow: 4px 0 12px rgba(0,0,0,0.3);
-            padding: 20px;
-            overflow-y: auto;
-            transition: all 0.6s ease;
-            opacity: 0;
-            z-index: 999;
+            position: fixed; top: 0; left: -500px; width: 400px; height: 100%;
+            background: #2d2d2d; color: #f8f8f2; box-shadow: 4px 0 12px rgba(0,0,0,0.3);
+            padding: 20px; overflow-y: auto; transition: all 0.6s ease; opacity: 0; z-index: 999;
         }
-        #code-panel.show {
-            left: 0;
-            opacity: 1;
-        }
+        #code-panel.show { left: 0; opacity: 1; }
         #close-btn, #normal-btn, #clear-btn {
-            background: #ff8c00;
-            color: #fff;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            margin: 5px;
+            background: #ff8c00; color: #fff; border: none; padding: 6px 12px;
+            border-radius: 6px; cursor: pointer; font-weight: bold; margin: 5px;
         }
         #close-btn:hover, #normal-btn:hover, #clear-btn:hover { background: #e67e22; }
 
-        pre {
-            background: #1e1e1e;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-family: Consolas, monospace;
-            text-align: left;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            line-height: 1.4;
-        }
-        .keyword { color: #ff79c6; }
-        .string { color: #f1fa8c; }
-        .comment { color: #6272a4; font-style: italic; }
-        .function { color: #50fa7b; }
+        pre { background: #1e1e1e; padding: 12px; border-radius: 8px; font-size: 13px;
+            font-family: Consolas, monospace; text-align: left; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4; }
     </style>
 </head>
 <body>
     <h1>🍊 Orange Chat Board</h1>
-
-    <!-- Orange chat bubble -->
-    <div id="chat-box">
-        <div class="glossy"></div>
-    </div>
-
-    <!-- Input bar neatly below -->
+    <div id="chat-box"><div class="glossy"></div></div>
     <div id="input-box">
         <input type="text" id="message" placeholder="Type your message..." />
         <button onclick="sendMessage()">Send</button>
@@ -125,7 +61,6 @@
     <script>
         const msgInput = document.getElementById("message");
 
-        // Enter key works
         msgInput.addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
@@ -138,12 +73,10 @@
             if (!msg) return;
 
             const chatBox = document.getElementById("chat-box");
-
             const userBubble = document.createElement("div");
             userBubble.className = "user";
             userBubble.innerHTML = "🙂 " + msg;
             chatBox.appendChild(userBubble);
-
             msgInput.value = "";
 
             const typingBubble = document.createElement("div");
@@ -154,47 +87,48 @@
 
             setTimeout(() => {
                 chatBox.removeChild(typingBubble);
-
                 const aiBubble = document.createElement("div");
                 aiBubble.className = "ai";
                 aiBubble.innerHTML = "🍊 " + "Got your message!";
                 chatBox.appendChild(aiBubble);
                 chatBox.scrollTop = chatBox.scrollHeight;
 
-                // If user asked for code, show code panel
+                // If user asked for code, generate and show code panel
                 if (msg.toLowerCase().includes("code")) {
-                    showCode();
+                    generateCode(msg);
                 }
             }, 800);
         }
 
-        function showCode() {
+        function generateCode(userRequest) {
             const codePanel = document.getElementById("code-panel");
             const codeContent = document.getElementById("code-content");
-            codeContent.innerHTML = `
-<span class="comment"># Initialize an empty list</span>
-<span class="keyword">my_list</span> = []
 
-<span class="comment"># Add some elements to the list</span>
-<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"apple"</span>)
-<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"banana"</span>)
-<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"cherry"</span>)
+            // Example: dynamically generate code based on request
+            if (userRequest.toLowerCase().includes("list")) {
+                codeContent.textContent = `
+# Initialize an empty list
+my_list = []
 
-<span class="comment"># Print the initial list</span>
-<span class="function">print</span>(<span class="string">"Initial List:"</span>, <span class="keyword">my_list</span>)
+# Add some elements
+my_list.append("apple")
+my_list.append("banana")
+my_list.append("cherry")
 
-<span class="comment"># Modify (update) an element</span>
-<span class="keyword">my_list</span>[1] = <span class="string">"blueberry"</span>
+print("Initial List:", my_list)
 
-<span class="comment"># Print the updated list</span>
-<span class="function">print</span>(<span class="string">"Updated List:"</span>, <span class="keyword">my_list</span>)
+# Modify an element
+my_list[1] = "blueberry"
+print("Updated List:", my_list)
 
-<span class="comment"># Add a new element</span>
-<span class="keyword">my_list</span>.<span class="function">append</span>(<span class="string">"date"</span>)
+# Add a new element
+my_list.append("date")
+print("Final List:", my_list)
+                `;
+            } else {
+                codeContent.textContent = "# Example code for: " + userRequest;
+            }
 
-<span class="comment"># Print the final list</span>
-<span class="function">print</span>(<span class="string">"Final List:"</span>, <span class="keyword">my_list</span>)
-            `;
             codePanel.classList.add("show");
         }
 
@@ -213,7 +147,7 @@
         function backToNormal() {
             const codePanel = document.getElementById("code-panel");
             const codeContent = document.getElementById("code-content");
-            codeContent.innerHTML = ""; // clear code
+            codeContent.textContent = ""; // clear code
             codePanel.classList.remove("show"); // hide panel
         }
     </script>
