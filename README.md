@@ -21,15 +21,21 @@ It connects to a Flask backend with Ollama for real AI replies, and features a c
 ---
 
 ## 🛠️ Tech Stack
-- **Frontend**: HTML, CSS, JavaScript
-- **Backend**: Flask (Python)
-- **AI Engine**: Ollama (local LLM integration)
-- **Deployment**: Railway / ngrok tunnel
+- **Frontend**: HTML, CSS, JavaScript  
+- **Backend**: Flask (Python)  
+- **AI Engine**: Ollama (local LLM integration)  
+- **Deployment**: Railway / ngrok tunnel  
 
 ---
 
 ## 📸 Screenshots
-*(Add screenshots or GIFs of your chat board here — showing the orange UI, swaying leaf, rainbow stars, and code panel)*
+- **Home UI**: `orangechat_home.png`  
+- **AI Reply**: `orangechat_reply.png`  
+- **Code Panel**: `orangechat_code.png`  
+- **Code Result (syntax highlighting)**: `orangechat_code_result.png`  
+- **Server Running**: `orangechat_server.png`  
+
+*(GIF demo recommended — showing typing → AI reply → dark mode stars)*
 
 ---
 
