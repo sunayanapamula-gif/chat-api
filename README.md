@@ -43,5 +43,5 @@ It connects to a Flask backend with Ollama for real AI replies, and features a c
 
 ### 1. Clone the repo
 ```bash
-git clone https://github.com/sunayana-gif/orange-chat-board.git
+git clone https://github.com/sunayanapamula-gif/orange-chat-board.git
 cd orange-chat-board
