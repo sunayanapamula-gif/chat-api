@@ -10,24 +10,8 @@
         #chat-box { border: 8px solid #ff8c00; border-radius: 50%; background: radial-gradient(circle at center, #ffa500 55%, #ffcc80 100%); width: 420px; height: 420px; margin: auto; padding: 20px; overflow-y: auto; color: #333; position: relative; box-shadow: 0 0 30px rgba(255,140,0,0.6), inset 0 0 20px rgba(255,255,255,0.4); transition: background 0.5s ease, box-shadow 0.5s ease; }
         .glossy { position: absolute; top: 10%; left: 15%; width: 60%; height: 30%; background: radial-gradient(circle at top left, rgba(255,255,255,0.8), transparent 70%); border-radius: 50%; opacity: 0.7; pointer-events: none; }
 
-        /* 🍃 Leaf on top of orange with sway animation */
-        .leaf {
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            width: 60px;
-            height: 30px;
-            background: linear-gradient(to right, #2e7d32, #66bb6a);
-            border-radius: 50% 50% 0 0;
-            transform: translateX(-50%) rotate(-20deg);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            animation: sway 3s infinite ease-in-out;
-        }
-        @keyframes sway {
-            0% { transform: translateX(-50%) rotate(-20deg); }
-            50% { transform: translateX(-50%) rotate(-10deg); }
-            100% { transform: translateX(-50%) rotate(-20deg); }
-        }
+        .leaf { position: absolute; top: -25px; left: 50%; width: 60px; height: 30px; background: linear-gradient(to right, #2e7d32, #66bb6a); border-radius: 50% 50% 0 0; transform: translateX(-50%) rotate(-20deg); box-shadow: 0 2px 6px rgba(0,0,0,0.3); animation: sway 3s infinite ease-in-out; }
+        @keyframes sway { 0% { transform: translateX(-50%) rotate(-20deg); } 50% { transform: translateX(-50%) rotate(-10deg); } 100% { transform: translateX(-50%) rotate(-20deg); } }
 
         .user { background: #ff7043; color: #fff; padding: 8px 12px; border-radius: 16px; margin: 8px auto; text-align: right; font-size: 14px; display: block; max-width: 80%; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
         .ai { background: #fff3e0; color: #222; padding: 8px 12px; border-radius: 16px; margin: 8px auto; text-align: left; font-size: 14px; display: block; max-width: 80%; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
@@ -45,7 +29,6 @@
         #close-btn, #normal-btn, #clear-btn { background: #ff8c00; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; margin: 5px; }
         #close-btn:hover, #normal-btn:hover, #clear-btn:hover { background: #e67e22; }
 
-        /* 🎨 Syntax highlighting for code */
         pre { background: #1e1e1e; padding: 12px; border-radius: 8px; font-size: 13px; font-family: Consolas, monospace; text-align: left; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4; }
         .keyword { color: #ff79c6; font-weight: bold; }
         .string { color: #f1fa8c; }
@@ -67,7 +50,7 @@
     <button id="theme-btn" onclick="toggleTheme()">Toggle Dark Theme</button>
     <div id="chat-box">
         <div class="glossy"></div>
-        <div class="leaf"></div> <!-- 🍃 Leaf added -->
+        <div class="leaf"></div>
     </div>
     <div id="input-box">
         <input type="text" id="message" placeholder="Type your message..." />
@@ -85,10 +68,10 @@
         const msgInput = document.getElementById("message");
         const chatBox = document.getElementById("chat-box");
 
-        msgInput.addEventListener("keydown", function(event) {
-                        if (event.key === "Enter") { 
-                event.preventDefault(); 
-                sendMessage(); 
+                msgInput.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                sendMessage();
             }
         });
 
@@ -170,9 +153,9 @@
         function backToNormal() {
             const codePanel = document.getElementById("code-panel");
             const codeContent = document.getElementById("code-content");
-            codeContent.textContent = ""; 
-            codePanel.classList.remove("show"); 
-            codePanel.style.opacity = "0"; 
+            codeContent.textContent = "";
+            codePanel.classList.remove("show");
+            codePanel.style.opacity = "0";
         }
 
         // Dark theme toggle with rainbow glowing drifting stars
